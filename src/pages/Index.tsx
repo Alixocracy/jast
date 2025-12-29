@@ -15,17 +15,17 @@ const IndexContent = () => {
       {/* Focus mode overlay */}
       {isFocusMode && (
         <div 
-          className="fixed inset-0 bg-background/70 backdrop-blur-[2px] z-10 animate-fade-in"
+          className="fixed inset-0 bg-background/85 backdrop-blur-[3px] z-10 animate-fade-in"
           onClick={() => setFocusedTask(null)}
         />
       )}
 
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8 relative">
-        <div className={isFocusMode ? "opacity-40 transition-opacity duration-300" : ""}>
+        <div className={isFocusMode ? "opacity-25 transition-opacity duration-300" : ""}>
           <Header />
         </div>
         
-        <div className={`mb-6 ${isFocusMode ? "opacity-40 transition-opacity duration-300" : ""}`}>
+        <div className={`mb-6 ${isFocusMode ? "opacity-25 transition-opacity duration-300" : ""}`}>
           <Affirmation />
         </div>
 
@@ -67,22 +67,22 @@ const IndexContent = () => {
                 </div>
               )}
             </div>
-            <div className={isFocusMode ? "opacity-40 transition-opacity duration-300" : ""}>
+            <div className={isFocusMode ? "opacity-25 transition-opacity duration-300" : ""}>
               <QuickActions />
             </div>
           </div>
           
           <div className="space-y-6">
-            <div className={isFocusMode ? "opacity-40 transition-opacity duration-300" : ""}>
+            <div className={isFocusMode ? "opacity-25 transition-opacity duration-300" : ""}>
               <TaskList />
             </div>
-            <div className={isFocusMode ? "opacity-40 transition-opacity duration-300" : ""}>
+            <div className={isFocusMode ? "opacity-25 transition-opacity duration-300" : ""}>
               <BrainDump />
             </div>
           </div>
         </div>
 
-        <footer className={`mt-12 text-center text-sm text-muted-foreground ${isFocusMode ? "opacity-40" : ""}`}>
+        <footer className={`mt-12 text-center text-sm text-muted-foreground ${isFocusMode ? "opacity-25" : ""}`}>
           <p>Remember: your brain is unique, not broken. 💚</p>
         </footer>
       </div>
