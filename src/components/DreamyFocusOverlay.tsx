@@ -1,14 +1,30 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
 import { X, Volume2, VolumeX } from "lucide-react";
-import { useState } from "react";
 
 export function DreamyFocusOverlay() {
   const { isFocusMode, focusedTask, setFocusedTask } = useFocusMode();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
 
+  const exitFocusMode = useCallback(() => {
+    setFocusedTask(null);
+  }, [setFocusedTask]);
+
+  // Handle escape key to exit
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFocusMode) {
+        exitFocusMode();
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFocusMode, exitFocusMode]);
+
+  // Handle audio playback
   useEffect(() => {
     if (isFocusMode) {
       if (!audioRef.current) {
@@ -16,7 +32,17 @@ export function DreamyFocusOverlay() {
         audioRef.current.loop = true;
         audioRef.current.volume = 0.3;
       }
-      audioRef.current.play().catch(console.log);
+      
+      // Play audio with user interaction handling
+      const playAudio = async () => {
+        try {
+          await audioRef.current?.play();
+        } catch (error) {
+          console.log("Audio autoplay blocked, will play on next interaction");
+        }
+      };
+      
+      playAudio();
     } else {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -37,10 +63,20 @@ export function DreamyFocusOverlay() {
     }
   }, [isMuted]);
 
+  // Attempt to play audio on any click (for browsers that block autoplay)
+  const handleOverlayClick = () => {
+    if (audioRef.current && audioRef.current.paused && !isMuted) {
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
   if (!isFocusMode || !focusedTask) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in"
+      onClick={handleOverlayClick}
+    >
       {/* Dreamy background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220,40%,15%)] via-[hsl(230,35%,20%)] to-[hsl(25,30%,20%)] overflow-hidden">
         {/* Stars */}
@@ -91,24 +127,35 @@ export function DreamyFocusOverlay() {
         />
       </div>
 
+      {/* Fixed position buttons at top corners */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          exitFocusMode();
+        }}
+        className="fixed top-6 right-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-sm text-white/70 hover:text-white hover:bg-white/20 transition-all"
+        aria-label="Exit focus mode"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsMuted(!isMuted);
+          // Try to play if unmuting
+          if (isMuted && audioRef.current?.paused) {
+            audioRef.current.play().catch(() => {});
+          }
+        }}
+        className="fixed top-6 left-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-sm text-white/70 hover:text-white hover:bg-white/20 transition-all"
+        aria-label={isMuted ? "Unmute music" : "Mute music"}
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+      </button>
+
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-8 px-4 max-w-md w-full">
-        {/* Close button */}
-        <button
-          onClick={() => setFocusedTask(null)}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white/70 hover:text-white hover:bg-white/20 transition-all"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Mute button */}
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="absolute top-4 left-4 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white/70 hover:text-white hover:bg-white/20 transition-all"
-        >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </button>
-
         {/* Timer with dreamy styling */}
         <div className="dreamy-timer w-full">
           <FocusTimer />
@@ -135,6 +182,11 @@ export function DreamyFocusOverlay() {
             Breathe. Focus. You've got this. ✨
           </p>
         </div>
+
+        {/* Exit hint */}
+        <p className="text-white/40 text-xs">
+          Press ESC or click the X to exit focus mode
+        </p>
       </div>
     </div>
   );
