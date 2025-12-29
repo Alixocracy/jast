@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Sparkles, Palette } from "lucide-react";
+import { Plus, Check, Sparkles, Palette, Target } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { usePointsContext } from "@/contexts/PointsContext";
+import { useFocusMode } from "@/contexts/FocusModeContext";
 import { toast } from "sonner";
 
 interface Task {
@@ -51,6 +52,17 @@ export function TaskList() {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0].value);
   const { addPoints } = usePointsContext();
+  const { setFocusedTask, focusedTask } = useFocusMode();
+
+  const handleFocusTask = (task: Task) => {
+    if (task.completed) return;
+    setFocusedTask({
+      id: task.id,
+      text: task.text,
+      color: task.color,
+    });
+    toast.success("Focus mode activated! 🎯");
+  };
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
@@ -119,7 +131,9 @@ export function TaskList() {
         {tasks.map((task) => (
           <div
             key={task.id}
-            className="group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200"
+            className={`group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 ${
+              focusedTask?.id === task.id ? "ring-2 ring-primary ring-offset-2" : ""
+            }`}
             style={{
               backgroundColor: task.completed ? undefined : `${task.color}20`,
               borderColor: task.completed ? undefined : `${task.color}40`,
@@ -151,6 +165,21 @@ export function TaskList() {
                 {task.text}
               </span>
             </div>
+
+            {/* Focus button - only for incomplete tasks */}
+            {!task.completed && (
+              <button
+                onClick={() => handleFocusTask(task)}
+                className={`opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded-md ${
+                  focusedTask?.id === task.id 
+                    ? "opacity-100 text-primary" 
+                    : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                }`}
+                title="Focus on this task"
+              >
+                <Target className="w-4 h-4" />
+              </button>
+            )}
 
             <Popover>
               <PopoverTrigger asChild>
