@@ -195,6 +195,21 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(20px); }
+}
+
+@keyframes drift-slow {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-30px) translateY(-10px); }
+}
+
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
@@ -211,7 +226,62 @@
   animation: scale-in 0.3s ease-out forwards;
 }
 
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.animate-drift {
+  animation: drift 8s ease-in-out infinite;
+}
+
+.animate-drift-slow {
+  animation: drift-slow 12s ease-in-out infinite;
+}
+
 .animate-delay-100 { animation-delay: 100ms; }
 .animate-delay-200 { animation-delay: 200ms; }
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
+
+/* Dreamy focus mode timer overrides */
+.dreamy-timer .bg-card {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+.dreamy-timer .text-foreground,
+.dreamy-timer .text-lg,
+.dreamy-timer .text-4xl {
+  color: white !important;
+}
+
+.dreamy-timer .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.dreamy-timer .bg-muted {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dreamy-timer .bg-primary {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.dreamy-timer .text-primary-foreground {
+  color: white !important;
+}
+
+.dreamy-timer .text-primary {
+  color: hsl(45, 60%, 80%) !important;
+}
+
+.dreamy-timer button[class*="outline"] {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+.dreamy-timer button[class*="outline"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
