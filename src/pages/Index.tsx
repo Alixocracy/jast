@@ -15,7 +15,7 @@ const IndexContent = () => {
       {/* Focus mode overlay */}
       {isFocusMode && (
         <div 
-          className="fixed inset-0 bg-background/85 backdrop-blur-[3px] z-10 animate-fade-in"
+          className="fixed inset-0 bg-background/185 backdrop-blur-[3px] z-10 animate-fade-in"
           onClick={() => setFocusedTask(null)}
         />
       )}
