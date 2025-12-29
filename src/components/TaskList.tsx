@@ -1,34 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Circle, Sparkles } from "lucide-react";
+import { Plus, Check, Sparkles, Palette } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Task {
   id: string;
   text: string;
   completed: boolean;
-  priority: "low" | "medium" | "high";
+  color: string;
 }
 
-const priorityColors = {
-  low: "bg-calm border-calm-foreground/20",
-  medium: "bg-accent border-accent-foreground/20",
-  high: "bg-gentle border-gentle-foreground/20",
-};
+const TASK_COLORS = [
+  { name: "Sage", value: "#A8C5A8" },
+  { name: "Lavender", value: "#C5A8C5" },
+  { name: "Sky", value: "#A8C5D5" },
+  { name: "Peach", value: "#E5C5A8" },
+  { name: "Rose", value: "#E5A8B5" },
+  { name: "Mint", value: "#A8E5D5" },
+  { name: "Butter", value: "#E5E5A8" },
+  { name: "Coral", value: "#E5B5A8" },
+];
 
-const priorityDots = {
-  low: "bg-calm-foreground/60",
-  medium: "bg-energy",
-  high: "bg-destructive",
+const STORAGE_KEY = "focusflow-tasks";
+
+const getStoredTasks = (): Task[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to load tasks from localStorage", e);
+  }
+  return [
+    { id: "1", text: "Take a 5-minute break", completed: false, color: TASK_COLORS[0].value },
+    { id: "2", text: "Drink a glass of water", completed: true, color: TASK_COLORS[2].value },
+    { id: "3", text: "Review today's priorities", completed: false, color: TASK_COLORS[4].value },
+  ];
 };
 
 export function TaskList() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", text: "Take a 5-minute break", completed: false, priority: "medium" },
-    { id: "2", text: "Drink a glass of water", completed: true, priority: "low" },
-    { id: "3", text: "Review today's priorities", completed: false, priority: "high" },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>(getStoredTasks);
   const [newTask, setNewTask] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0].value);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  }, [tasks]);
 
   const addTask = () => {
     if (newTask.trim()) {
@@ -38,12 +61,18 @@ export function TaskList() {
           id: Date.now().toString(),
           text: newTask.trim(),
           completed: false,
-          priority: "medium",
+          color: selectedColor,
         },
       ]);
       setNewTask("");
       setIsAdding(false);
     }
+  };
+
+  const updateTaskColor = (id: string, color: string) => {
+    setTasks(tasks.map((task) =>
+      task.id === id ? { ...task, color } : task
+    ));
   };
 
   const toggleTask = (id: string) => {
@@ -82,11 +111,11 @@ export function TaskList() {
         {tasks.map((task) => (
           <div
             key={task.id}
-            className={`group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 ${
-              task.completed
-                ? "bg-muted/50 border-border"
-                : priorityColors[task.priority]
-            }`}
+            className="group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200"
+            style={{
+              backgroundColor: task.completed ? undefined : `${task.color}20`,
+              borderColor: task.completed ? undefined : `${task.color}40`,
+            }}
           >
             <button
               onClick={() => toggleTask(task.id)}
@@ -100,7 +129,10 @@ export function TaskList() {
             </button>
             
             <div className="flex-1 flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${priorityDots[task.priority]}`} />
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: task.color }}
+              />
               <span
                 className={`text-sm transition-all duration-200 ${
                   task.completed
@@ -111,6 +143,30 @@ export function TaskList() {
                 {task.text}
               </span>
             </div>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-all duration-200">
+                  <Palette className="w-4 h-4" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2" align="end">
+                <div className="grid grid-cols-4 gap-1">
+                  {TASK_COLORS.map((color) => (
+                    <button
+                      key={color.value}
+                      onClick={() => updateTaskColor(task.id, color.value)}
+                      className="w-6 h-6 rounded-full border-2 transition-all hover:scale-110"
+                      style={{
+                        backgroundColor: color.value,
+                        borderColor: task.color === color.value ? "hsl(var(--foreground))" : "transparent",
+                      }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
 
             <button
               onClick={() => deleteTask(task.id)}
@@ -124,22 +180,39 @@ export function TaskList() {
 
       {/* Add task */}
       {isAdding ? (
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addTask()}
-            placeholder="What needs to be done?"
-            className="flex-1 px-4 py-2 rounded-xl bg-muted border-0 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            autoFocus
-          />
-          <Button onClick={addTask} size="sm">
-            Add
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setIsAdding(false)}>
-            Cancel
-          </Button>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTask()}
+              placeholder="What needs to be done?"
+              className="flex-1 px-4 py-2 rounded-xl bg-muted border-0 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              autoFocus
+            />
+            <Button onClick={addTask} size="sm">
+              Add
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setIsAdding(false)}>
+              Cancel
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Color:</span>
+            {TASK_COLORS.map((color) => (
+              <button
+                key={color.value}
+                onClick={() => setSelectedColor(color.value)}
+                className="w-5 h-5 rounded-full border-2 transition-all hover:scale-110"
+                style={{
+                  backgroundColor: color.value,
+                  borderColor: selectedColor === color.value ? "hsl(var(--foreground))" : "transparent",
+                }}
+                title={color.name}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <Button
