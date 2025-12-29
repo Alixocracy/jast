@@ -1,21 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Brain, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Thought {
   id: string;
   text: string;
-  timestamp: Date;
+  timestamp: string;
 }
 
+const STORAGE_KEY = "focusflow-braindump";
+
+const getStoredThoughts = (): Thought[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to load thoughts from localStorage", e);
+  }
+  return [];
+};
+
 export function BrainDump() {
-  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [thoughts, setThoughts] = useState<Thought[]>(getStoredThoughts);
   const [currentThought, setCurrentThought] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(thoughts));
+  }, [thoughts]);
 
   const addThought = () => {
     if (currentThought.trim()) {
       setThoughts([
-        { id: Date.now().toString(), text: currentThought.trim(), timestamp: new Date() },
+        { id: Date.now().toString(), text: currentThought.trim(), timestamp: new Date().toISOString() },
         ...thoughts,
       ]);
       setCurrentThought("");
