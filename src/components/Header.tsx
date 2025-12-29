@@ -23,7 +23,7 @@ export function Header() {
         <div className="w-10 h-10 rounded-xl gradient-calm flex items-center justify-center shadow-soft">
           <Sparkles className="w-5 h-5 text-primary" />
         </div>
-        <span className="text-sm font-medium text-muted-foreground">FocusFlow</span>
+        <span className="text-sm font-medium text-muted-foreground">JAST: Just A Lovable App!</span>
       </div>
       
       <h1 className="text-3xl font-semibold text-foreground mb-1">

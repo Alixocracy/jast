@@ -48,6 +48,13 @@ export function Affirmation() {
             <span className="text-xs font-medium text-accent-foreground/70 uppercase tracking-wide">
               Daily Reminder
             </span>
+            <button
+              onClick={getNewAffirmation}
+              className="ml-1 p-2 rounded-full text-accent-foreground/60 hover:text-accent-foreground hover:bg-white/10 transition-colors"
+              aria-label="New reminder"
+            >
+              <RefreshCw className={`w-4 h-4 ${isAnimating ? "animate-spin" : ""}`} />
+            </button>
           </div>
           
           <p
@@ -57,14 +64,6 @@ export function Affirmation() {
           >
             {currentAffirmation}
           </p>
-
-          <button
-            onClick={getNewAffirmation}
-            className="flex items-center gap-2 text-sm text-accent-foreground/60 hover:text-accent-foreground transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${isAnimating ? "animate-spin" : ""}`} />
-            New reminder
-          </button>
         </div>
 
         <PointsDisplay total={total} history={history} onReset={resetPoints} />
