@@ -238,6 +238,32 @@
   animation: drift-slow 12s ease-in-out infinite;
 }
 
+@keyframes drift-reverse {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(40px) translateY(15px); }
+}
+
+.animate-drift-reverse {
+  animation: drift-reverse 15s ease-in-out infinite;
+}
+
+@keyframes float-dust {
+  0% { 
+    transform: translateY(0) translateX(0); 
+    opacity: 0;
+  }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { 
+    transform: translateY(-100px) translateX(30px); 
+    opacity: 0;
+  }
+}
+
+.animate-float-dust {
+  animation: float-dust 8s ease-in-out infinite;
+}
+
 .animate-delay-100 { animation-delay: 100ms; }
 .animate-delay-200 { animation-delay: 200ms; }
 .animate-delay-300 { animation-delay: 300ms; }
@@ -245,10 +271,15 @@
 
 /* Dreamy focus mode timer overrides */
 .dreamy-timer .bg-card {
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  padding: 1rem !important;
+}
+
+.dreamy-timer .text-4xl {
+  font-size: 2.5rem !important;
 }
 
 .dreamy-timer .text-foreground,
