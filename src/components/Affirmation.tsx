@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { RefreshCw, Heart } from "lucide-react";
+import { PointsDisplay } from "./PointsDisplay";
+import { usePointsContext } from "@/contexts/PointsContext";
 
 const affirmations = [
   "You are capable of amazing things.",
@@ -22,6 +24,7 @@ const affirmations = [
 export function Affirmation() {
   const [currentAffirmation, setCurrentAffirmation] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
+  const { total, history, resetPoints } = usePointsContext();
 
   const getNewAffirmation = () => {
     setIsAnimating(true);
@@ -38,28 +41,34 @@ export function Affirmation() {
 
   return (
     <div className="gradient-warm rounded-2xl p-6 shadow-card animate-fade-in">
-      <div className="flex items-center gap-2 mb-3">
-        <Heart className="w-4 h-4 text-energy" />
-        <span className="text-xs font-medium text-accent-foreground/70 uppercase tracking-wide">
-          Daily Reminder
-        </span>
-      </div>
-      
-      <p
-        className={`text-xl font-medium text-accent-foreground mb-4 min-h-[3.5rem] transition-all duration-200 ${
-          isAnimating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
-        }`}
-      >
-        {currentAffirmation}
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-3">
+            <Heart className="w-4 h-4 text-energy" />
+            <span className="text-xs font-medium text-accent-foreground/70 uppercase tracking-wide">
+              Daily Reminder
+            </span>
+          </div>
+          
+          <p
+            className={`text-xl font-medium text-accent-foreground mb-4 min-h-[3.5rem] transition-all duration-200 ${
+              isAnimating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+            }`}
+          >
+            {currentAffirmation}
+          </p>
 
-      <button
-        onClick={getNewAffirmation}
-        className="flex items-center gap-2 text-sm text-accent-foreground/60 hover:text-accent-foreground transition-colors"
-      >
-        <RefreshCw className={`w-4 h-4 ${isAnimating ? "animate-spin" : ""}`} />
-        New reminder
-      </button>
+          <button
+            onClick={getNewAffirmation}
+            className="flex items-center gap-2 text-sm text-accent-foreground/60 hover:text-accent-foreground transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${isAnimating ? "animate-spin" : ""}`} />
+            New reminder
+          </button>
+        </div>
+
+        <PointsDisplay total={total} history={history} onReset={resetPoints} />
+      </div>
     </div>
   );
 }
