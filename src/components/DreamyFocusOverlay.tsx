@@ -1,12 +1,27 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
-import { X, Volume2, VolumeX } from "lucide-react";
+import { X, Volume2, VolumeX, Image } from "lucide-react";
+
+// Import background images
+import watercolorLandscape from "@/assets/backgrounds/watercolor-landscape.png";
+import mistyForest from "@/assets/backgrounds/misty-forest.png";
+import moonlitSky from "@/assets/backgrounds/moonlit-sky.png";
+import oceanSunset from "@/assets/backgrounds/ocean-sunset.png";
+
+const BACKGROUNDS = [
+  { id: "landscape", name: "Landscape", src: watercolorLandscape },
+  { id: "forest", name: "Misty Forest", src: mistyForest },
+  { id: "moon", name: "Moonlit Sky", src: moonlitSky },
+  { id: "ocean", name: "Ocean Sunset", src: oceanSunset },
+];
 
 export function DreamyFocusOverlay() {
   const { isFocusMode, focusedTask, setFocusedTask } = useFocusMode();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0]);
+  const [showBgPicker, setShowBgPicker] = useState(false);
 
   const exitFocusMode = useCallback(() => {
     setFocusedTask(null);
@@ -68,6 +83,7 @@ export function DreamyFocusOverlay() {
     if (audioRef.current && audioRef.current.paused && !isMuted) {
       audioRef.current.play().catch(() => {});
     }
+    setShowBgPicker(false);
   };
 
   if (!isFocusMode || !focusedTask) return null;
@@ -77,17 +93,25 @@ export function DreamyFocusOverlay() {
       className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in"
       onClick={handleOverlayClick}
     >
-      {/* Dreamy background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220,40%,15%)] via-[hsl(230,35%,20%)] to-[hsl(25,30%,20%)] overflow-hidden">
-        {/* Stars */}
+      {/* Background image with overlay */}
+      <div className="absolute inset-0 overflow-hidden">
+        <img 
+          src={selectedBg.src} 
+          alt={selectedBg.name}
+          className="w-full h-full object-cover transition-opacity duration-500"
+        />
+        {/* Dark overlay for better readability */}
+        <div className="absolute inset-0 bg-black/40" />
+        
+        {/* Subtle animated elements */}
         <div className="absolute inset-0">
-          {[...Array(50)].map((_, i) => (
+          {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-white/60 rounded-full animate-twinkle"
+              className="absolute w-1 h-1 bg-white/30 rounded-full animate-twinkle"
               style={{
                 left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 60}%`,
+                top: `${Math.random() * 40}%`,
                 animationDelay: `${Math.random() * 3}s`,
                 animationDuration: `${2 + Math.random() * 2}s`,
               }}
@@ -95,32 +119,9 @@ export function DreamyFocusOverlay() {
           ))}
         </div>
         
-        {/* Moon glow */}
-        <div 
-          className="absolute top-[15%] right-[20%] w-32 h-32 rounded-full animate-float"
-          style={{
-            background: "radial-gradient(circle, hsl(45, 40%, 90%) 0%, hsl(45, 30%, 70%) 40%, transparent 70%)",
-            boxShadow: "0 0 80px 40px hsl(45, 40%, 70% / 0.3)",
-          }}
-        />
-        
-        {/* Clouds/mist layers */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-[60%] opacity-40 animate-drift"
-          style={{
-            background: "linear-gradient(to top, hsl(35, 30%, 60% / 0.4), transparent)",
-          }}
-        />
-        <div 
-          className="absolute bottom-[10%] left-[-10%] w-[120%] h-[40%] opacity-30 animate-drift-slow"
-          style={{
-            background: "radial-gradient(ellipse at center, hsl(220, 30%, 50% / 0.3), transparent 70%)",
-          }}
-        />
-        
         {/* Noise/grain texture overlay */}
         <div 
-          className="absolute inset-0 opacity-[0.15] pointer-events-none"
+          className="absolute inset-0 opacity-[0.08] pointer-events-none"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           }}
@@ -153,6 +154,50 @@ export function DreamyFocusOverlay() {
       >
         {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
       </button>
+
+      {/* Background picker button */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowBgPicker(!showBgPicker);
+          }}
+          className="p-3 rounded-full bg-white/10 backdrop-blur-sm text-white/70 hover:text-white hover:bg-white/20 transition-all"
+          aria-label="Change background"
+        >
+          <Image className="w-6 h-6" />
+        </button>
+
+        {/* Background picker dropdown */}
+        {showBgPicker && (
+          <div 
+            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex gap-2 animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {BACKGROUNDS.map((bg) => (
+              <button
+                key={bg.id}
+                onClick={() => {
+                  setSelectedBg(bg);
+                  setShowBgPicker(false);
+                }}
+                className={`w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                  selectedBg.id === bg.id 
+                    ? "border-white scale-105" 
+                    : "border-transparent hover:border-white/50"
+                }`}
+                aria-label={bg.name}
+              >
+                <img 
+                  src={bg.src} 
+                  alt={bg.name}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-8 px-4 max-w-md w-full">
