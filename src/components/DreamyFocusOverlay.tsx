@@ -100,28 +100,66 @@ export function DreamyFocusOverlay() {
           alt={selectedBg.name}
           className="w-full h-full object-cover transition-opacity duration-500"
         />
-        {/* Dark overlay for better readability */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Lighter dark overlay */}
+        <div className="absolute inset-0 bg-black/25" />
         
-        {/* Subtle animated elements */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+        {/* Floating dust particles */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(60)].map((_, i) => (
             <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/30 rounded-full animate-twinkle"
+              key={`dust-${i}`}
+              className="absolute rounded-full bg-white/40 animate-float-dust"
               style={{
+                width: `${1 + Math.random() * 3}px`,
+                height: `${1 + Math.random() * 3}px`,
                 left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 40}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 8}s`,
+                animationDuration: `${6 + Math.random() * 8}s`,
               }}
             />
           ))}
         </div>
+
+        {/* Twinkling stars */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="absolute w-1 h-1 bg-white/50 rounded-full animate-twinkle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 50}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Drifting fog layers */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-[50%] opacity-30 animate-drift pointer-events-none"
+          style={{
+            background: "linear-gradient(to top, rgba(255,255,255,0.3), transparent)",
+          }}
+        />
+        <div 
+          className="absolute bottom-[5%] left-[-20%] w-[140%] h-[40%] opacity-20 animate-drift-slow pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, rgba(255,255,255,0.4), transparent 70%)",
+          }}
+        />
+        <div 
+          className="absolute top-[20%] right-[-10%] w-[60%] h-[30%] opacity-15 animate-drift-reverse pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, rgba(255,255,255,0.3), transparent 60%)",
+          }}
+        />
         
         {/* Noise/grain texture overlay */}
         <div 
-          className="absolute inset-0 opacity-[0.08] pointer-events-none"
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           }}
