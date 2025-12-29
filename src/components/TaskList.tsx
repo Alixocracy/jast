@@ -6,6 +6,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { usePointsContext } from "@/contexts/PointsContext";
+import { toast } from "sonner";
 
 interface Task {
   id: string;
@@ -48,6 +50,7 @@ export function TaskList() {
   const [newTask, setNewTask] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0].value);
+  const { addPoints } = usePointsContext();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
@@ -76,9 +79,14 @@ export function TaskList() {
   };
 
   const toggleTask = (id: string) => {
+    const task = tasks.find((t) => t.id === id);
+    if (task && !task.completed) {
+      addPoints("Completed task", 2);
+      toast.success("+2 points for completing a task! ⭐");
+    }
     setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
+      tasks.map((t) =>
+        t.id === id ? { ...t, completed: !t.completed } : t
       )
     );
   };
