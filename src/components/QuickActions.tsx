@@ -1,4 +1,4 @@
-import { Coffee, Droplets, Footprints, Wind } from "lucide-react";
+import { Coffee, Droplets, Footprints, Wind, Smile, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { usePointsContext } from "@/contexts/PointsContext";
 
@@ -30,6 +30,20 @@ const actions = [
     message: "A short break can spark creativity! ☕",
     color: "bg-accent text-accent-foreground hover:bg-accent/80",
     points: 3,
+  },
+  {
+    icon: Smile,
+    label: "Smile",
+    message: "Smiling releases happy chemicals! 😊",
+    color: "bg-energy/20 text-energy hover:bg-energy/30",
+    points: 1,
+  },
+  {
+    icon: Heart,
+    label: "Appreciate",
+    message: "Gratitude rewires your brain for joy! 💖",
+    color: "bg-primary/20 text-primary hover:bg-primary/30",
+    points: 2,
   },
 ];
 
