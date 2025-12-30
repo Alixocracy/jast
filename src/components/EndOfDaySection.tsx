@@ -45,8 +45,9 @@ export function EndOfDaySection() {
     const thoughts: Thought[] = JSON.parse(localStorage.getItem(BRAINDUMP_KEY) || "[]");
     const pointsData = JSON.parse(localStorage.getItem(POINTS_KEY) || '{"total":0,"history":[]}');
     const points = typeof pointsData === 'object' ? pointsData.total : 0;
+    const pointsHistory = typeof pointsData === 'object' ? (pointsData.history || []) : [];
 
-    return { tasks, thoughts, points };
+    return { tasks, thoughts, points, pointsHistory };
   };
 
   const handleSendEmail = async () => {
@@ -64,7 +65,7 @@ export function EndOfDaySection() {
 
     setIsSending(true);
     
-    const { tasks, thoughts, points } = getTodayData();
+    const { tasks, thoughts, points, pointsHistory } = getTodayData();
     
     try {
       const { data, error } = await supabase.functions.invoke('send-daily-summary', {
@@ -74,6 +75,7 @@ export function EndOfDaySection() {
           tasks,
           thoughts,
           points,
+          pointsHistory,
         },
       });
 
