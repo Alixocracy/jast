@@ -6,7 +6,7 @@ import { BrainDump } from "@/components/BrainDump";
 import { QuickActions } from "@/components/QuickActions";
 import { FocusModeProvider, useFocusMode } from "@/contexts/FocusModeContext";
 import { DreamyFocusOverlay } from "@/components/DreamyFocusOverlay";
-import { OnboardingModal } from "@/components/OnboardingModal";
+import { OnboardingProvider } from "@/components/OnboardingModal";
 import { EndOfDaySection } from "@/components/EndOfDaySection";
 import { UserNameProvider } from "@/contexts/UserNameContext";
 
@@ -15,9 +15,6 @@ const IndexContent = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Onboarding for first-time users */}
-      <OnboardingModal />
-      
       {/* Dreamy focus overlay */}
       <DreamyFocusOverlay />
 
@@ -57,9 +54,11 @@ const IndexContent = () => {
 const Index = () => {
   return (
     <UserNameProvider>
-      <FocusModeProvider>
-        <IndexContent />
-      </FocusModeProvider>
+      <OnboardingProvider>
+        <FocusModeProvider>
+          <IndexContent />
+        </FocusModeProvider>
+      </OnboardingProvider>
     </UserNameProvider>
   );
 };

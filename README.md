@@ -1,73 +1,42 @@
-# Welcome to your Lovable project
+![JAST hero](public/JAST-here.png)
 
-## Project info
+# JAST – Your Personal Wellbeing Assistant
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+JAST keeps you focused, organized, and kind to yourself. It pairs a calming interface with practical tools like focus timers, quick actions, task lists, brain dumps, and end-of-day reflections. Data stays in your browser by default—no account required.
 
-## How can I edit this code?
+## Features
+- Friendly onboarding that greets you by name and can be reopened anytime
+- Focus timer with a dreamy overlay for deep work
+- Quick actions to kickstart tasks without friction
+- Task list + brain dump to capture and organize everything
+- End-of-day reflection to close loops and celebrate wins
+- Light/dark theming, responsive layout, and smooth micro-animations
 
-There are several ways of editing your application.
+## Requirements
+- Node.js 18+ (recommend using [nvm](https://github.com/nvm-sh/nvm))
+- npm 9+ (ships with Node)
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+## Setup
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+git clone <your_repo_url>
+cd <your_project_folder>
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open http://localhost:5173 (or the port Vite reports) to start using JAST.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Scripts
+- `npm run dev` — start the Vite dev server
+- `npm run build` — production build to `dist/`
+- `npm run preview` — preview the production build locally
+- `npm run lint` — lint the codebase
 
-**Use GitHub Codespaces**
+## Deployment
+1. Build: `npm run build`
+2. Serve the `dist/` directory with any static host (Netlify, Vercel, GitHub Pages, S3, etc.).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Want to support JAST?
+If JAST helps you stay on track, consider buying a coffee: 
+https://www.buymeacoffee.com/jastapp
+https://paypal.me/alixocracy

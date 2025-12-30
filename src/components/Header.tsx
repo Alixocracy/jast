@@ -1,9 +1,11 @@
-import { Sparkles } from "lucide-react";
 import { useUserName } from "@/contexts/UserNameContext";
 import { ThemeToggle } from "./ThemeToggle";
+import { JastAvatar } from "./JastAvatar";
+import { useOnboarding } from "./OnboardingModal";
 
 export function Header() {
   const { userName } = useUserName();
+  const { openOnboarding } = useOnboarding();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -25,9 +27,14 @@ export function Header() {
     <header className="mb-8 animate-fade-in">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl gradient-calm flex items-center justify-center shadow-soft">
-            <Sparkles className="w-5 h-5 text-primary" />
-          </div>
+          <button
+            type="button"
+            onClick={() => openOnboarding(1)}
+            className="rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="Open welcome dialog to update your name"
+          >
+            <JastAvatar size={48} className="transition-shadow hover:shadow-md" />
+          </button>
           <span className="text-sm font-medium text-muted-foreground">JAST: Your Personal Wellbeing Assistant</span>
         </div>
         <ThemeToggle />
