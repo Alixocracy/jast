@@ -25,6 +25,8 @@ const getStoredThoughts = (): Thought[] => {
 export function BrainDump() {
   const [thoughts, setThoughts] = useState<Thought[]>(getStoredThoughts);
   const [currentThought, setCurrentThought] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(thoughts));
@@ -42,6 +44,26 @@ export function BrainDump() {
 
   const deleteThought = (id: string) => {
     setThoughts(thoughts.filter((t) => t.id !== id));
+  };
+
+  const startEditing = (thought: Thought) => {
+    setEditingId(thought.id);
+    setEditText(thought.text);
+  };
+
+  const saveEdit = () => {
+    if (editingId && editText.trim()) {
+      setThoughts(thoughts.map((t) =>
+        t.id === editingId ? { ...t, text: editText.trim() } : t
+      ));
+    }
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
   };
 
   const clearAll = () => {
@@ -100,7 +122,30 @@ export function BrainDump() {
               key={thought.id}
               className="group flex items-start gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
             >
-              <span className="flex-1 text-sm text-foreground">{thought.text}</span>
+              {editingId === thought.id ? (
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      saveEdit();
+                    }
+                    if (e.key === "Escape") cancelEdit();
+                  }}
+                  onBlur={saveEdit}
+                  className="flex-1 px-2 py-1 rounded bg-background border border-primary/50 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none min-h-[60px]"
+                  autoFocus
+                />
+              ) : (
+                <span 
+                  onClick={() => startEditing(thought)}
+                  className="flex-1 text-sm text-foreground cursor-pointer hover:text-primary transition-colors"
+                  title="Click to edit"
+                >
+                  {thought.text}
+                </span>
+              )}
               <button
                 onClick={() => deleteThought(thought.id)}
                 className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"

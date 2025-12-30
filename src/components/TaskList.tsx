@@ -51,6 +51,8 @@ export function TaskList() {
   const [newTask, setNewTask] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0].value);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const { addPoints } = usePointsContext();
   const { setFocusedTask, focusedTask } = useFocusMode();
 
@@ -107,6 +109,26 @@ export function TaskList() {
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
+  const startEditing = (task: Task) => {
+    setEditingId(task.id);
+    setEditText(task.text);
+  };
+
+  const saveEdit = () => {
+    if (editingId && editText.trim()) {
+      setTasks(tasks.map((task) =>
+        task.id === editingId ? { ...task, text: editText.trim() } : task
+      ));
+    }
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+  };
+
   const completedCount = tasks.filter((t) => t.completed).length;
 
   return (
@@ -152,18 +174,35 @@ export function TaskList() {
             
             <div className="flex-1 flex items-center gap-2">
               <div
-                className="w-2 h-2 rounded-full"
+                className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ backgroundColor: task.color }}
               />
-              <span
-                className={`text-sm transition-all duration-200 ${
-                  task.completed
-                    ? "text-muted-foreground line-through"
-                    : "text-foreground"
-                }`}
-              >
-                {task.text}
-              </span>
+              {editingId === task.id ? (
+                <input
+                  type="text"
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveEdit();
+                    if (e.key === "Escape") cancelEdit();
+                  }}
+                  onBlur={saveEdit}
+                  className="flex-1 px-2 py-1 rounded bg-background border border-primary/50 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  autoFocus
+                />
+              ) : (
+                <span
+                  onClick={() => !task.completed && startEditing(task)}
+                  className={`text-sm transition-all duration-200 ${
+                    task.completed
+                      ? "text-muted-foreground line-through"
+                      : "text-foreground cursor-pointer hover:text-primary"
+                  }`}
+                  title={task.completed ? undefined : "Click to edit"}
+                >
+                  {task.text}
+                </span>
+              )}
             </div>
 
             {/* Focus button - only for incomplete tasks */}
