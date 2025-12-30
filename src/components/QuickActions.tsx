@@ -1,4 +1,4 @@
-import { Coffee, Droplets, Footprints, Wind, Smile, Heart } from "lucide-react";
+import { Coffee, Droplets, Footprints, Wind, Smile, Heart, PiggyBank } from "lucide-react";
 import { toast } from "sonner";
 import { usePointsContext } from "@/contexts/PointsContext";
 
@@ -58,24 +58,50 @@ export function QuickActions() {
   };
 
   return (
-    <div className="bg-card rounded-2xl p-6 shadow-card animate-fade-in animate-delay-400">
-      <h2 className="text-lg font-semibold text-foreground mb-4">Quick Wellness</h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        Tap to log a self-care moment and earn points
-      </p>
+    <div className="bg-card rounded-2xl p-6 shadow-card animate-fade-in animate-delay-400 space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Quick Wellness</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Tap to log a self-care moment and earn points
+        </p>
 
-      <div className="grid grid-cols-2 gap-3">
-        {actions.map((action) => (
-          <button
-            key={action.label}
-            onClick={() => handleAction(action)}
-            className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-200 ${action.color} relative`}
+        <div className="grid grid-cols-2 gap-3">
+          {actions.map((action) => (
+            <button
+              key={action.label}
+              onClick={() => handleAction(action)}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-200 ${action.color} relative`}
+            >
+              <action.icon className="w-6 h-6" />
+              <span className="text-sm font-medium">{action.label}</span>
+              <span className="absolute top-2 right-2 text-xs opacity-70">+{action.points}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-muted">
+        <h3 className="text-sm font-semibold text-foreground mb-3">Support JAST!</h3>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <a
+            href="https://www.buymeacoffee.com/jastapp"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-sm font-medium"
           >
-            <action.icon className="w-6 h-6" />
-            <span className="text-sm font-medium">{action.label}</span>
-            <span className="absolute top-2 right-2 text-xs opacity-70">+{action.points}</span>
-          </button>
-        ))}
+            <Coffee className="w-4 h-4 text-primary" />
+            Buy me a coffee
+          </a>
+          <a
+            href="https://paypal.me/alixocracy"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-sm font-medium"
+          >
+            <PiggyBank className="w-4 h-4 text-primary" />
+            Support on PayPal
+          </a>
+        </div>
       </div>
     </div>
   );

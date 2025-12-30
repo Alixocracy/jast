@@ -43,6 +43,8 @@ const getStoredTasks = (): Task[] => {
     { id: "1", text: "Take a 5-minute break", completed: false, color: TASK_COLORS[0].value },
     { id: "2", text: "Drink a glass of water", completed: true, color: TASK_COLORS[2].value },
     { id: "3", text: "Review today's priorities", completed: false, color: TASK_COLORS[4].value },
+    { id: "4", text: "Set one clear focus for this session", completed: false, color: TASK_COLORS[6].value },
+    { id: "5", text: "Tidy your desk for 2 minutes", completed: false, color: TASK_COLORS[5].value },
   ];
 };
 

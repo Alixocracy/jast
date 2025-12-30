@@ -36,7 +36,7 @@ export function usePoints() {
       total: prev.total + points,
       history: [
         { action, points, timestamp: new Date().toISOString() },
-        ...prev.history.slice(0, 49), // Keep last 50 entries
+        ...prev.history,
       ],
     }));
   }, []);

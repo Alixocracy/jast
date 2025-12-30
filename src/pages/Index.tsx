@@ -9,6 +9,7 @@ import { DreamyFocusOverlay } from "@/components/DreamyFocusOverlay";
 import { OnboardingProvider } from "@/components/OnboardingModal";
 import { EndOfDaySection } from "@/components/EndOfDaySection";
 import { UserNameProvider } from "@/contexts/UserNameContext";
+import { MessageCircle } from "lucide-react";
 
 const IndexContent = () => {
   const { isFocusMode } = useFocusMode();
@@ -45,6 +46,17 @@ const IndexContent = () => {
 
         <footer className="mt-12 text-center text-sm text-muted-foreground">
           <p>Remember: your brain is unique, not broken. 💚</p>
+          <div className="mt-3 flex items-center justify-center gap-2 text-foreground">
+            <MessageCircle className="w-4 h-4 text-primary" />
+            <a
+              href="https://forms.gle/S3HMEF9UShV4PQoW9"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Share feedback
+            </a>
+          </div>
         </footer>
       </div>
     </div>

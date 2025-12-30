@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause } from "lucide-react";
+import { useFocusMode } from "@/contexts/FocusModeContext";
 
 interface FocusTimerProps {
   defaultMinutes?: number;
@@ -10,8 +11,70 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
   const [timeLeft, setTimeLeft] = useState(defaultMinutes * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState(defaultMinutes);
+  const [isEditing, setIsEditing] = useState(false);
+  const [customTime, setCustomTime] = useState("");
+  const alarmRef = useRef<HTMLAudioElement | null>(null);
+  const alarmTimeoutsRef = useRef<number[]>([]);
+  const previousTimeLeftRef = useRef(timeLeft);
+  const previousFocusModeRef = useRef(false);
+  const wasRunningBeforeEditRef = useRef(false);
+  const { isFocusMode } = useFocusMode();
 
   const durations = [5, 15, 25, 45];
+
+  useEffect(() => {
+    const audio = new Audio("/audio/piano-alarm.wav");
+    audio.preload = "auto";
+    audio.volume = 0.5;
+    alarmRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
+  }, []);
+
+  const stopAlarm = useCallback(() => {
+    alarmTimeoutsRef.current.forEach((id) => clearTimeout(id));
+    alarmTimeoutsRef.current = [];
+
+    if (alarmRef.current) {
+      alarmRef.current.pause();
+      alarmRef.current.currentTime = 0;
+    }
+  }, []);
+
+  const playAlarmOnce = useCallback(() => {
+    if (!alarmRef.current) return;
+    alarmRef.current.pause();
+    alarmRef.current.currentTime = 0;
+    alarmRef.current.play().catch(() => {});
+  }, []);
+
+  const playAlarmSequence = useCallback(() => {
+    stopAlarm();
+    playAlarmOnce();
+
+    const repeatDelayMs = 1700;
+    const timeouts = [repeatDelayMs, repeatDelayMs * 2].map((delay) =>
+      window.setTimeout(playAlarmOnce, delay)
+    );
+
+    alarmTimeoutsRef.current = timeouts;
+  }, [playAlarmOnce, stopAlarm]);
+
+  useEffect(() => {
+    const wasFocusMode = previousFocusModeRef.current;
+    if (isFocusMode && !wasFocusMode) {
+      // Entering focus mode: start the timer automatically
+      setIsRunning(true);
+    } else if (!isFocusMode && wasFocusMode) {
+      // Exiting focus mode: stop any alarms and pause the timer
+      stopAlarm();
+      setIsRunning(false);
+    }
+    previousFocusModeRef.current = isFocusMode;
+  }, [isFocusMode, stopAlarm]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -27,25 +90,69 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
 
+  useEffect(() => {
+    const prev = previousTimeLeftRef.current;
+    if (prev > 0 && timeLeft === 0) {
+      playAlarmSequence();
+    }
+    previousTimeLeftRef.current = timeLeft;
+  }, [playAlarmSequence, timeLeft]);
+
   const toggleTimer = useCallback(() => {
     setIsRunning((prev) => !prev);
   }, []);
 
-  const resetTimer = useCallback(() => {
-    setIsRunning(false);
-    setTimeLeft(selectedDuration * 60);
-  }, [selectedDuration]);
-
   const selectDuration = useCallback((minutes: number) => {
+    stopAlarm();
     setSelectedDuration(minutes);
     setTimeLeft(minutes * 60);
-    setIsRunning(false);
-  }, []);
+    // Keep the current running state (no-op) so active timers continue
+  }, [stopAlarm]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const parseSecondsFromInput = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.includes(":")) {
+      const [minsPart, secsPart = "0"] = trimmed.split(":");
+      const mins = Number(minsPart);
+      const secs = Number(secsPart);
+      if (Number.isNaN(mins) || Number.isNaN(secs)) return null;
+      return Math.max(1, mins * 60 + secs);
+    }
+
+    const minutesOnly = Number(trimmed);
+    if (Number.isNaN(minutesOnly)) return null;
+    return Math.max(1, minutesOnly * 60);
+  };
+
+  const startEditing = () => {
+    wasRunningBeforeEditRef.current = isRunning;
+    stopAlarm();
+    setIsRunning(false);
+    setIsEditing(true);
+    setCustomTime(formatTime(timeLeft));
+  };
+
+  const commitCustomMinutes = () => {
+    const totalSeconds = parseSecondsFromInput(customTime);
+    if (!totalSeconds) {
+      setIsRunning(wasRunningBeforeEditRef.current);
+      setIsEditing(false);
+      return;
+    }
+
+    const minutes = Math.max(1, Math.ceil(totalSeconds / 60));
+    setSelectedDuration(minutes);
+    setTimeLeft(totalSeconds);
+    setIsRunning(wasRunningBeforeEditRef.current);
+    setIsEditing(false);
   };
 
   const progress = ((selectedDuration * 60 - timeLeft) / (selectedDuration * 60)) * 100;
@@ -55,7 +162,7 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
       <h2 className="text-lg font-semibold text-foreground mb-4">Focus Timer</h2>
       
       {/* Duration selector */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 justify-center flex-wrap">
         {durations.map((duration) => (
           <button
             key={duration}
@@ -96,13 +203,35 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
             className="text-primary transition-all duration-1000"
           />
         </svg>
-        <span className="absolute text-4xl font-light text-foreground tabular-nums">
-          {formatTime(timeLeft)}
-        </span>
+        {isEditing ? (
+          <input
+            type="text"
+            inputMode="numeric"
+            value={customTime}
+            autoFocus
+            onChange={(e) => setCustomTime(e.target.value)}
+            onBlur={commitCustomMinutes}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitCustomMinutes();
+              if (e.key === "Escape") setIsEditing(false);
+            }}
+            className="absolute shrink-0 text-center text-3xl font-light leading-tight text-foreground bg-background/90 border border-input/70 rounded-md px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-primary/60"
+            style={{ width: "112px", minWidth: "112px", maxWidth: "112px" }}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={startEditing}
+            className="absolute text-4xl font-light text-foreground tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/60 rounded-lg px-2"
+            aria-label="Set custom timer minutes"
+          >
+            {formatTime(timeLeft)}
+          </button>
+        )}
       </div>
 
       {/* Controls */}
-      <div className="flex gap-3 justify-center">
+      <div className="flex justify-center">
         <Button
           variant="default"
           size="lg"
@@ -120,9 +249,6 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
               Start
             </>
           )}
-        </Button>
-        <Button variant="ghost" size="lg" onClick={resetTimer} className="border border-input">
-          <RotateCcw className="w-5 h-5" />
         </Button>
       </div>
 

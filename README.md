@@ -36,7 +36,24 @@ Open http://localhost:5173 (or the port Vite reports) to start using JAST.
 1. Build: `npm run build`
 2. Serve the `dist/` directory with any static host (Netlify, Vercel, GitHub Pages, S3, etc.).
 
+
 ## Want to support JAST?
 If JAST helps you stay on track, consider buying a coffee: 
 https://www.buymeacoffee.com/jastapp
 https://paypal.me/alixocracy
+
+## Any feedbak?
+https://forms.gle/S3HMEF9UShV4PQoW9
+
+
+<p>
+  <a href="https://www.buymeacoffee.com/jastapp" title="Buy me a coffee" target="_blank" rel="noreferrer">
+    <img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-donate?logo=buymeacoffee&logoColor=white&label=Support&color=ff813f" alt="Buy me a coffee badge" />
+  </a>
+  <a href="https://paypal.me/alixocracy" title="Donate via PayPal" target="_blank" rel="noreferrer" style="margin-left:8px;">
+    <img src="https://img.shields.io/badge/PayPal-donate?logo=paypal&logoColor=white&label=Support&color=00457C" alt="PayPal donation badge" />
+  </a>
+  <a href="https://forms.gle/S3HMEF9UShV4PQoW9" title="Share feedback" target="_blank" rel="noreferrer" style="margin-left:8px;">
+    <img src="https://img.shields.io/badge/Feedback-forms.gle-4ade80?logo=googleforms&logoColor=white&label=Tell%20us&color=16a34a" alt="Feedback badge" />
+  </a>
+</p>
