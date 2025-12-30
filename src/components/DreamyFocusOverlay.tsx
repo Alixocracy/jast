@@ -4,16 +4,20 @@ import { FocusTimer } from "./FocusTimer";
 import { X, Volume2, VolumeX, Image } from "lucide-react";
 
 // Import background images
-import watercolorLandscape from "@/assets/backgrounds/watercolor-landscape.png";
 import mistyForest from "@/assets/backgrounds/misty-forest.png";
 import moonlitSky from "@/assets/backgrounds/moonlit-sky.png";
 import oceanSunset from "@/assets/backgrounds/ocean-sunset.png";
+import mountainLake from "@/assets/backgrounds/mountain-lake.png";
+import zenGarden from "@/assets/backgrounds/zen-garden.png";
+import auroraNight from "@/assets/backgrounds/aurora-night.png";
 
 const BACKGROUNDS = [
-  { id: "landscape", name: "Landscape", src: watercolorLandscape },
   { id: "forest", name: "Misty Forest", src: mistyForest },
   { id: "moon", name: "Moonlit Sky", src: moonlitSky },
   { id: "ocean", name: "Ocean Sunset", src: oceanSunset },
+  { id: "lake", name: "Mountain Lake", src: mountainLake },
+  { id: "zen", name: "Zen Garden", src: zenGarden },
+  { id: "aurora", name: "Aurora Night", src: auroraNight },
 ];
 
 export function DreamyFocusOverlay() {
