@@ -117,8 +117,8 @@ export function EndOfDaySection() {
     localStorage.setItem(TASKS_KEY, JSON.stringify([]));
     // Clear brain dump
     localStorage.setItem(BRAINDUMP_KEY, JSON.stringify([]));
-    // Reset points
-    localStorage.setItem(POINTS_KEY, "0");
+    // Reset points with proper structure
+    localStorage.setItem(POINTS_KEY, JSON.stringify({ total: 0, history: [] }));
     
     toast.success("Fresh start! Ready for tomorrow 🌅");
     
