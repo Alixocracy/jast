@@ -30,7 +30,7 @@ export function Header() {
       </div>
       
       <h1 className="text-3xl font-semibold text-foreground mb-1">
-        {getGreeting()}{userName ? `, ${userName}` : ""} {getTimeEmoji()}
+        {getGreeting()}{userName ? ` ${userName}` : ""} {getTimeEmoji()}
       </h1>
       <p className="text-muted-foreground">
         Let's make today manageable, one step at a time.
