@@ -269,102 +269,111 @@
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 
-/* Dreamy focus mode inline timer (for control panel) */
-.dreamy-timer-inline .bg-card {
+/* Dreamy focus mode - Horizontal timer panel layout */
+.dreamy-timer-panel .bg-card {
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
-.dreamy-timer-inline h2 {
+.dreamy-timer-panel h2,
+.dreamy-timer-panel p.animate-pulse-gentle {
   display: none !important;
 }
 
-.dreamy-timer-inline .flex.gap-2.mb-6 {
-  display: none !important;
-}
-
-.dreamy-timer-inline .mb-6:has(svg) {
+/* Timer display section */
+.dreamy-timer-panel .relative.flex.items-center.justify-center.mb-6 {
   margin-bottom: 0 !important;
+  order: 1;
 }
 
-.dreamy-timer-inline svg.w-40 {
-  width: 48px !important;
-  height: 48px !important;
+.dreamy-timer-panel svg.w-40 {
+  width: 72px !important;
+  height: 72px !important;
 }
 
-.dreamy-timer-inline svg.w-40 circle {
-  cx: 24;
-  cy: 24;
-  r: 20;
-  stroke-width: 4;
+.dreamy-timer-panel svg.w-40 circle {
+  cx: 36;
+  cy: 36;
+  r: 30;
+  stroke-width: 5;
 }
 
-.dreamy-timer-inline .relative.flex.items-center.justify-center.mb-6 {
-  margin-bottom: 0 !important;
+.dreamy-timer-panel .text-muted {
+  color: rgba(255, 255, 255, 0.2) !important;
 }
 
-.dreamy-timer-inline .text-4xl {
-  font-size: 0.75rem !important;
+.dreamy-timer-panel .text-primary {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.dreamy-timer-panel .text-4xl {
+  font-size: 1rem !important;
   font-weight: 500 !important;
+  color: white !important;
 }
 
-.dreamy-timer-inline .flex.gap-3 {
-  gap: 0.25rem !important;
+/* Duration buttons section */
+.dreamy-timer-panel .flex.gap-2.mb-6 {
+  margin-bottom: 0 !important;
+  gap: 0.375rem !important;
+  order: 2;
 }
 
-.dreamy-timer-inline .flex.gap-3 button {
+.dreamy-timer-panel .flex.gap-2.mb-6 button {
   padding: 0.25rem 0.5rem !important;
-  font-size: 0.7rem !important;
-  height: auto !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
-.dreamy-timer-inline .flex.gap-3 button svg {
+.dreamy-timer-panel .flex.gap-2.mb-6 button.bg-primary {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+/* Control buttons section */
+.dreamy-timer-panel .flex.gap-3 {
+  gap: 0.375rem !important;
+  order: 3;
+}
+
+.dreamy-timer-panel .flex.gap-3 button {
+  padding: 0.375rem 0.625rem !important;
+  font-size: 0.75rem !important;
+  height: auto !important;
+  border-radius: 0.5rem !important;
+}
+
+.dreamy-timer-panel .flex.gap-3 button svg {
   width: 0.875rem !important;
   height: 0.875rem !important;
 }
 
-.dreamy-timer-inline .flex.gap-3 button span {
-  display: none !important;
-}
-
-.dreamy-timer-inline .text-foreground,
-.dreamy-timer-inline .text-lg,
-.dreamy-timer-inline .text-4xl {
+/* Start/Pause button */
+.dreamy-timer-panel .flex.gap-3 button[class*="default"] {
+  background: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
 }
 
-.dreamy-timer-inline .text-muted-foreground {
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.dreamy-timer-inline .bg-muted {
-  background: rgba(255, 255, 255, 0.15) !important;
-}
-
-.dreamy-timer-inline .bg-primary {
+.dreamy-timer-panel .flex.gap-3 button[class*="default"]:hover {
   background: rgba(255, 255, 255, 0.3) !important;
 }
 
-.dreamy-timer-inline .text-primary-foreground {
-  color: white !important;
-}
-
-.dreamy-timer-inline .text-primary {
-  color: hsl(45, 60%, 85%) !important;
-}
-
-.dreamy-timer-inline button[class*="outline"] {
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  color: white !important;
-}
-
-.dreamy-timer-inline button[class*="outline"]:hover {
+/* Reset button - ghost variant styling for focus mode */
+.dreamy-timer-panel .flex.gap-3 button[class*="ghost"] {
   background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
 }
 
-.dreamy-timer-inline p.animate-pulse-gentle {
-  display: none !important;
+.dreamy-timer-panel .flex.gap-3 button[class*="ghost"]:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
 }
