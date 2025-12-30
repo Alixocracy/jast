@@ -269,94 +269,102 @@
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 
-/* Dreamy focus mode compact timer */
-.dreamy-timer-compact .bg-card {
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: none;
-  padding: 0.75rem !important;
-  border-radius: 1rem;
+/* Dreamy focus mode inline timer (for control panel) */
+.dreamy-timer-inline .bg-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }
 
-.dreamy-timer-compact h2 {
+.dreamy-timer-inline h2 {
   display: none !important;
 }
 
-.dreamy-timer-compact .flex.gap-2.mb-6 {
-  margin-bottom: 0.5rem !important;
+.dreamy-timer-inline .flex.gap-2.mb-6 {
+  display: none !important;
+}
+
+.dreamy-timer-inline .mb-6:has(svg) {
+  margin-bottom: 0 !important;
+}
+
+.dreamy-timer-inline svg.w-40 {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.dreamy-timer-inline svg.w-40 circle {
+  cx: 24;
+  cy: 24;
+  r: 20;
+  stroke-width: 4;
+}
+
+.dreamy-timer-inline .relative.flex.items-center.justify-center.mb-6 {
+  margin-bottom: 0 !important;
+}
+
+.dreamy-timer-inline .text-4xl {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+}
+
+.dreamy-timer-inline .flex.gap-3 {
   gap: 0.25rem !important;
 }
 
-.dreamy-timer-compact .flex.gap-2.mb-6 button {
+.dreamy-timer-inline .flex.gap-3 button {
   padding: 0.25rem 0.5rem !important;
   font-size: 0.7rem !important;
+  height: auto !important;
 }
 
-.dreamy-timer-compact svg.w-40 {
-  width: 100px !important;
-  height: 100px !important;
+.dreamy-timer-inline .flex.gap-3 button svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
 }
 
-.dreamy-timer-compact svg.w-40 circle {
-  cx: 50;
-  cy: 50;
-  r: 44;
+.dreamy-timer-inline .flex.gap-3 button span {
+  display: none !important;
 }
 
-.dreamy-timer-compact .text-4xl {
-  font-size: 1.5rem !important;
-}
-
-.dreamy-timer-compact .mb-6:has(svg) {
-  margin-bottom: 0.5rem !important;
-}
-
-.dreamy-timer-compact .flex.gap-3 button {
-  padding: 0.5rem 0.75rem !important;
-  font-size: 0.8rem !important;
-}
-
-.dreamy-timer-compact .flex.gap-3 button svg {
-  width: 1rem !important;
-  height: 1rem !important;
-}
-
-.dreamy-timer-compact .text-foreground,
-.dreamy-timer-compact .text-lg,
-.dreamy-timer-compact .text-4xl {
+.dreamy-timer-inline .text-foreground,
+.dreamy-timer-inline .text-lg,
+.dreamy-timer-inline .text-4xl {
   color: white !important;
 }
 
-.dreamy-timer-compact .text-muted-foreground {
+.dreamy-timer-inline .text-muted-foreground {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.dreamy-timer-compact .bg-muted {
-  background: rgba(255, 255, 255, 0.1) !important;
+.dreamy-timer-inline .bg-muted {
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
-.dreamy-timer-compact .bg-primary {
-  background: rgba(255, 255, 255, 0.25) !important;
+.dreamy-timer-inline .bg-primary {
+  background: rgba(255, 255, 255, 0.3) !important;
 }
 
-.dreamy-timer-compact .text-primary-foreground {
+.dreamy-timer-inline .text-primary-foreground {
   color: white !important;
 }
 
-.dreamy-timer-compact .text-primary {
-  color: hsl(45, 60%, 80%) !important;
+.dreamy-timer-inline .text-primary {
+  color: hsl(45, 60%, 85%) !important;
 }
 
-.dreamy-timer-compact button[class*="outline"] {
+.dreamy-timer-inline button[class*="outline"] {
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: white !important;
 }
 
-.dreamy-timer-compact button[class*="outline"]:hover {
+.dreamy-timer-inline button[class*="outline"]:hover {
   background: rgba(255, 255, 255, 0.1) !important;
 }
 
-.dreamy-timer-compact p.animate-pulse-gentle {
+.dreamy-timer-inline p.animate-pulse-gentle {
   display: none !important;
 }
