@@ -249,7 +249,7 @@ export function DreamyFocusOverlay() {
 
       {/* Task Card - Lower portion */}
       <div className="relative z-10 flex-1 flex items-end justify-center pb-[20%]">
-        <div className="px-4">
+        <div className="px-4 flex flex-col items-center">
           <div 
             className="p-6 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in"
             style={{
@@ -271,11 +271,11 @@ export function DreamyFocusOverlay() {
               Breathe. Focus. You've got this. ✨
             </p>
           </div>
+          {/* Exit hint */}
+          <p className="text-white/30 text-xs text-center mt-4">
+            Press ESC to exit focus mode
+          </p>
         </div>
-        {/* Exit hint */}
-        <p className="text-white/30 text-xs text-center mt-4">
-          Press ESC to exit focus mode
-        </p>
       </div>
     </div>
   );
