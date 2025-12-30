@@ -22,22 +22,17 @@ const IndexContent = () => {
           <Affirmation />
         </div>
 
-        {/* Timer and Tasks side by side */}
-        <div className="grid gap-4 md:grid-cols-[280px_1fr] mb-6">
-          {!isFocusMode && (
-            <div className="md:sticky md:top-8">
-              <FocusTimer />
-            </div>
-          )}
-          <div className={!isFocusMode ? "" : "md:col-span-2"}>
-            <TaskList />
-          </div>
-        </div>
-
-        {/* Quick Actions and Brain Dump */}
         <div className="grid gap-6 md:grid-cols-2">
-          <QuickActions />
-          <BrainDump />
+          <div className="space-y-6">
+            {/* Hide timer in normal view when focus mode is active */}
+            {!isFocusMode && <FocusTimer />}
+            <QuickActions />
+          </div>
+          
+          <div className="space-y-6">
+            <TaskList />
+            <BrainDump />
+          </div>
         </div>
 
         <footer className="mt-12 text-center text-sm text-muted-foreground">
