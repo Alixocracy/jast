@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Moon, Mail, RefreshCw, Check } from "lucide-react";
+import { Moon, Mail, RefreshCw, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserName } from "./OnboardingModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,48 +38,15 @@ export function EndOfDaySection() {
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const { userName } = useUserName();
 
-  const getTodaySummary = () => {
+  const getTodayData = () => {
     const tasks: Task[] = JSON.parse(localStorage.getItem(TASKS_KEY) || "[]");
     const thoughts: Thought[] = JSON.parse(localStorage.getItem(BRAINDUMP_KEY) || "[]");
-    const points = localStorage.getItem(POINTS_KEY) || "0";
+    const pointsData = JSON.parse(localStorage.getItem(POINTS_KEY) || '{"total":0,"history":[]}');
+    const points = typeof pointsData === 'object' ? pointsData.total : 0;
 
-    const completedTasks = tasks.filter(t => t.completed);
-    const pendingTasks = tasks.filter(t => !t.completed);
-
-    let summary = `📊 Your Day with JAST - ${new Date().toLocaleDateString()}\n\n`;
-    summary += `⭐ Points earned: ${points}\n\n`;
-    
-    summary += `✅ Completed Tasks (${completedTasks.length}):\n`;
-    if (completedTasks.length > 0) {
-      completedTasks.forEach(t => {
-        summary += `  • ${t.text}\n`;
-      });
-    } else {
-      summary += "  No tasks completed today\n";
-    }
-    
-    summary += `\n📋 Pending Tasks (${pendingTasks.length}):\n`;
-    if (pendingTasks.length > 0) {
-      pendingTasks.forEach(t => {
-        summary += `  • ${t.text}\n`;
-      });
-    } else {
-      summary += "  All caught up!\n";
-    }
-
-    summary += `\n💭 Brain Dump Entries (${thoughts.length}):\n`;
-    if (thoughts.length > 0) {
-      thoughts.forEach(t => {
-        summary += `  • ${t.text}\n`;
-      });
-    } else {
-      summary += "  Mind was clear today\n";
-    }
-
-    summary += "\n---\nHave a restful night! See you tomorrow 🌙";
-
-    return summary;
+    return { tasks, thoughts, points };
   };
 
   const handleSendEmail = async () => {
@@ -87,7 +56,7 @@ export function EndOfDaySection() {
     }
 
     // Basic email validation
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
       return;
@@ -95,18 +64,28 @@ export function EndOfDaySection() {
 
     setIsSending(true);
     
-    // Simulate sending email (in a real app, this would call a backend)
-    // For now, we'll copy to clipboard and show the summary
-    const summary = getTodaySummary();
+    const { tasks, thoughts, points } = getTodayData();
     
     try {
-      await navigator.clipboard.writeText(summary);
-      toast.success("Summary copied to clipboard! You can paste it in an email.");
+      const { data, error } = await supabase.functions.invoke('send-daily-summary', {
+        body: {
+          email,
+          userName: userName || 'Friend',
+          tasks,
+          thoughts,
+          points,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Summary sent to your email! 📧");
       setEmailSent(true);
-    } catch {
-      // Fallback: show in alert
-      toast.info("Your daily summary is ready!");
-      console.log(summary);
+    } catch (error: any) {
+      console.error("Error sending email:", error);
+      toast.error(error.message || "Failed to send email. Please try again.");
     }
     
     setIsSending(false);
@@ -134,7 +113,7 @@ export function EndOfDaySection() {
       </div>
 
       <p className="text-sm text-muted-foreground mb-4">
-        Ready to wrap up? Get a summary of today and start fresh tomorrow.
+        Ready to wrap up? Get a beautiful summary of today sent to your email.
       </p>
 
       <div className="space-y-4">
@@ -142,7 +121,7 @@ export function EndOfDaySection() {
         <div className="p-4 rounded-xl bg-muted/50 space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Mail className="w-4 h-4" />
-            <span>Get today's summary</span>
+            <span>Email today's summary</span>
           </div>
           
           <div className="flex gap-2">
@@ -152,20 +131,26 @@ export function EndOfDaySection() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               className="flex-1"
-              disabled={emailSent}
+              disabled={emailSent || isSending}
             />
             <Button 
               onClick={handleSendEmail} 
               disabled={isSending || emailSent}
               size="sm"
             >
-              {emailSent ? <Check className="w-4 h-4" /> : "Send"}
+              {isSending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : emailSent ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                "Send"
+              )}
             </Button>
           </div>
           
           {emailSent && (
             <p className="text-xs text-green-600 dark:text-green-400">
-              Summary copied! Paste it anywhere to save.
+              ✓ Summary sent! Check your inbox.
             </p>
           )}
         </div>

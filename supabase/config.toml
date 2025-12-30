@@ -1,1 +1,4 @@
 project_id = "ksimqxdnvsqzupvmmysn"
+
+[functions.send-daily-summary]
+verify_jwt = false
