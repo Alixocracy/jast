@@ -248,7 +248,7 @@ export function DreamyFocusOverlay() {
       </div>
 
       {/* Task Card - Lower portion */}
-      <div className="relative z-10 pb-[15%]">
+      <div className="relative z-10 flex-1 flex items-end justify-center pb-[20%]">
         <div className="flex justify-center px-4">
           <div 
             className="p-5 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in max-w-md w-full"
