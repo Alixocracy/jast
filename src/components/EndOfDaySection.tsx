@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Moon, Mail, RefreshCw, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useUserName } from "./OnboardingModal";
+import { useUserName } from "@/contexts/UserNameContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -93,15 +94,30 @@ export function EndOfDaySection() {
     setIsSending(false);
   };
 
+  const [keepUndoneTasks, setKeepUndoneTasks] = useState(true);
+
   const handleReset = () => {
-    // Clear tasks (but keep the structure)
-    localStorage.setItem(TASKS_KEY, JSON.stringify([]));
+    // Get current tasks
+    const tasks: Task[] = JSON.parse(localStorage.getItem(TASKS_KEY) || "[]");
+    
+    if (keepUndoneTasks) {
+      // Keep only uncompleted tasks
+      const undoneTasks = tasks.filter(t => !t.completed);
+      localStorage.setItem(TASKS_KEY, JSON.stringify(undoneTasks));
+    } else {
+      // Clear all tasks
+      localStorage.setItem(TASKS_KEY, JSON.stringify([]));
+    }
+    
     // Clear brain dump
     localStorage.setItem(BRAINDUMP_KEY, JSON.stringify([]));
     // Reset points with proper structure
     localStorage.setItem(POINTS_KEY, JSON.stringify({ total: 0, history: [] }));
     
-    toast.success("Fresh start! Ready for tomorrow 🌅");
+    toast.success(keepUndoneTasks 
+      ? "Fresh start! Undone tasks carried over 🌅" 
+      : "Fresh start! Ready for tomorrow 🌅"
+    );
     
     // Reload the page to reflect changes
     window.location.reload();
@@ -169,14 +185,29 @@ export function EndOfDaySection() {
             <AlertDialogHeader>
               <AlertDialogTitle>Start fresh tomorrow?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will clear all tasks, brain dump entries, and reset your points to 0. 
+                This will clear brain dump entries and reset your points to 0. 
                 Make sure you've saved your summary if you want to keep a record!
               </AlertDialogDescription>
             </AlertDialogHeader>
+            
+            <div className="flex items-center space-x-2 py-2">
+              <Checkbox 
+                id="keep-undone" 
+                checked={keepUndoneTasks}
+                onCheckedChange={(checked) => setKeepUndoneTasks(checked === true)}
+              />
+              <label 
+                htmlFor="keep-undone" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Keep undone tasks for tomorrow
+              </label>
+            </div>
+            
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleReset}>
-                Yes, reset everything
+                Yes, reset
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

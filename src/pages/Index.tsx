@@ -8,6 +8,7 @@ import { FocusModeProvider, useFocusMode } from "@/contexts/FocusModeContext";
 import { DreamyFocusOverlay } from "@/components/DreamyFocusOverlay";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { EndOfDaySection } from "@/components/EndOfDaySection";
+import { UserNameProvider } from "@/contexts/UserNameContext";
 
 const IndexContent = () => {
   const { isFocusMode } = useFocusMode();
@@ -55,9 +56,11 @@ const IndexContent = () => {
 
 const Index = () => {
   return (
-    <FocusModeProvider>
-      <IndexContent />
-    </FocusModeProvider>
+    <UserNameProvider>
+      <FocusModeProvider>
+        <IndexContent />
+      </FocusModeProvider>
+    </UserNameProvider>
   );
 };
 

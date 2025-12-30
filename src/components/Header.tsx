@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { useUserName } from "./OnboardingModal";
+import { useUserName } from "@/contexts/UserNameContext";
 
 export function Header() {
   const { userName } = useUserName();

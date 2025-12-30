@@ -8,26 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useUserName } from "@/contexts/UserNameContext";
 
 const ONBOARDING_KEY = "focusflow-onboarding-complete";
-const USER_NAME_KEY = "focusflow-user-name";
-
-export function useUserName() {
-  const [userName, setUserName] = useState<string>(() => {
-    try {
-      return localStorage.getItem(USER_NAME_KEY) || "";
-    } catch {
-      return "";
-    }
-  });
-
-  const updateUserName = (name: string) => {
-    setUserName(name);
-    localStorage.setItem(USER_NAME_KEY, name);
-  };
-
-  return { userName, updateUserName };
-}
 
 export function OnboardingModal() {
   const [isOpen, setIsOpen] = useState(false);
