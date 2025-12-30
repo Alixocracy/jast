@@ -172,8 +172,8 @@ export function DreamyFocusOverlay() {
         <X className="w-5 h-5" />
       </button>
 
-      {/* Horizontal Control Panel - Centered */}
-      <div className="relative z-10 flex-1 flex items-center justify-center">
+      {/* Horizontal Control Panel - Upper area */}
+      <div className="relative z-10 flex justify-center pt-[15%]">
         <div 
           className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10"
           onClick={(e) => e.stopPropagation()}
