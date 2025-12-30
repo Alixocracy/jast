@@ -11,7 +11,12 @@ const getStoredPoints = (): PointsData => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Ensure valid structure with history array
+      return {
+        total: typeof parsed.total === "number" ? parsed.total : 0,
+        history: Array.isArray(parsed.history) ? parsed.history : [],
+      };
     }
   } catch (e) {
     console.error("Failed to load points from localStorage", e);
