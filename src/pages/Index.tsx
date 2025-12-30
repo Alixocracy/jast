@@ -6,12 +6,17 @@ import { BrainDump } from "@/components/BrainDump";
 import { QuickActions } from "@/components/QuickActions";
 import { FocusModeProvider, useFocusMode } from "@/contexts/FocusModeContext";
 import { DreamyFocusOverlay } from "@/components/DreamyFocusOverlay";
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { EndOfDaySection } from "@/components/EndOfDaySection";
 
 const IndexContent = () => {
   const { isFocusMode } = useFocusMode();
 
   return (
     <div className="min-h-screen bg-background relative">
+      {/* Onboarding for first-time users */}
+      <OnboardingModal />
+      
       {/* Dreamy focus overlay */}
       <DreamyFocusOverlay />
 
@@ -33,6 +38,11 @@ const IndexContent = () => {
             <TaskList />
             <BrainDump />
           </div>
+        </div>
+
+        {/* End of Day Section */}
+        <div className="mt-6">
+          <EndOfDaySection />
         </div>
 
         <footer className="mt-12 text-center text-sm text-muted-foreground">
