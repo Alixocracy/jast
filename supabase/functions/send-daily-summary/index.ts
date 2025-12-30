@@ -21,12 +21,19 @@ interface Thought {
   timestamp: string;
 }
 
+interface PointsHistoryEntry {
+  action: string;
+  points: number;
+  timestamp: string;
+}
+
 interface DailySummaryRequest {
   email: string;
   userName: string;
   tasks: Task[];
   thoughts: Thought[];
   points: number;
+  pointsHistory: PointsHistoryEntry[];
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -36,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, userName, tasks, thoughts, points }: DailySummaryRequest = await req.json();
+    const { email, userName, tasks, thoughts, points, pointsHistory = [] }: DailySummaryRequest = await req.json();
     
     console.log(`Sending daily summary to ${email} for user ${userName}`);
 
@@ -48,6 +55,41 @@ const handler = async (req: Request): Promise<Response> => {
       month: 'long', 
       day: 'numeric' 
     });
+
+    // Calculate points breakdown like in PointsDisplay
+    const LEVELS = [
+      { min: 0, name: "Seedling", emoji: "🌱", color: "#34d399" },
+      { min: 50, name: "Rising Star", emoji: "⭐", color: "#38bdf8" },
+      { min: 100, name: "Achiever", emoji: "⚡", color: "#a78bfa" },
+      { min: 200, name: "Champion", emoji: "🔥", color: "#fb923c" },
+      { min: 500, name: "Master", emoji: "👑", color: "#fbbf24" },
+    ];
+
+    const getLevelInfo = (pts: number) => {
+      for (let i = LEVELS.length - 1; i >= 0; i--) {
+        if (pts >= LEVELS[i].min) {
+          const nextLevel = LEVELS[i + 1];
+          const progress = nextLevel 
+            ? ((pts - LEVELS[i].min) / (nextLevel.min - LEVELS[i].min)) * 100
+            : 100;
+          return { 
+            ...LEVELS[i], 
+            progress: Math.min(progress, 100),
+            nextLevel: nextLevel?.name,
+            pointsToNext: nextLevel ? nextLevel.min - pts : 0
+          };
+        }
+      }
+      return { ...LEVELS[0], progress: 0, nextLevel: LEVELS[1]?.name, pointsToNext: LEVELS[1]?.min || 0, emoji: "🌱", color: "#34d399", name: "Seedling" };
+    };
+
+    const levelInfo = getLevelInfo(points);
+    
+    // Calculate points by category
+    const taskPoints = pointsHistory.filter(h => h.action.includes('task')).reduce((sum, h) => sum + h.points, 0);
+    const wellnessPoints = pointsHistory.filter(h => ['Drink Water', 'Deep Breath', 'Take a Walk', 'Mindful Break'].includes(h.action)).reduce((sum, h) => sum + h.points, 0);
+    const focusPoints = pointsHistory.filter(h => h.action.includes('Focus')).reduce((sum, h) => sum + h.points, 0);
+    const otherPoints = pointsHistory.filter(h => !h.action.includes('task') && !['Drink Water', 'Deep Breath', 'Take a Walk', 'Mindful Break'].includes(h.action) && !h.action.includes('Focus')).reduce((sum, h) => sum + h.points, 0);
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -87,19 +129,72 @@ const handler = async (req: Request): Promise<Response> => {
             </td>
           </tr>
           
-          <!-- Points Badge -->
+          <!-- Points & Level Section -->
           <tr>
             <td style="padding: 0 30px 20px;">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; text-align: center;">
-                    <span style="font-size: 32px;">⭐</span>
-                    <p style="margin: 10px 0 0; color: #92400e; font-size: 24px; font-weight: 700;">
-                      ${points} Points Earned
-                    </p>
-                    <p style="margin: 5px 0 0; color: #b45309; font-size: 14px;">
-                      Great progress today!
-                    </p>
+                  <td style="background: linear-gradient(135deg, ${levelInfo.color}22 0%, ${levelInfo.color}44 100%); border-radius: 12px; padding: 20px; border: 2px solid ${levelInfo.color};">
+                    <!-- Level Header -->
+                    <div style="text-align: center; margin-bottom: 15px;">
+                      <span style="font-size: 40px;">${levelInfo.emoji}</span>
+                      <p style="margin: 8px 0 0; color: ${levelInfo.color}; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                        Current Level
+                      </p>
+                      <p style="margin: 4px 0 0; color: #333; font-size: 22px; font-weight: 700;">
+                        ${levelInfo.name}
+                      </p>
+                    </div>
+                    
+                    <!-- Total Points -->
+                    <div style="text-align: center; background: ${levelInfo.color}; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                      <p style="margin: 0; color: white; font-size: 28px; font-weight: 700;">
+                        ${points} Points
+                      </p>
+                      ${levelInfo.nextLevel ? `
+                        <p style="margin: 5px 0 0; color: rgba(255,255,255,0.85); font-size: 12px;">
+                          ${levelInfo.pointsToNext} more to reach ${levelInfo.nextLevel}
+                        </p>
+                      ` : `
+                        <p style="margin: 5px 0 0; color: rgba(255,255,255,0.85); font-size: 12px;">
+                          You've reached the highest level! 🎉
+                        </p>
+                      `}
+                    </div>
+                    
+                    <!-- Points Breakdown -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding: 8px; text-align: center; width: 25%;">
+                          <div style="background: white; border-radius: 8px; padding: 10px;">
+                            <span style="font-size: 18px;">✓</span>
+                            <p style="margin: 4px 0 0; font-size: 18px; font-weight: 700; color: #333;">${taskPoints}</p>
+                            <p style="margin: 2px 0 0; font-size: 10px; color: #888;">Tasks</p>
+                          </div>
+                        </td>
+                        <td style="padding: 8px; text-align: center; width: 25%;">
+                          <div style="background: white; border-radius: 8px; padding: 10px;">
+                            <span style="font-size: 18px;">💚</span>
+                            <p style="margin: 4px 0 0; font-size: 18px; font-weight: 700; color: #333;">${wellnessPoints}</p>
+                            <p style="margin: 2px 0 0; font-size: 10px; color: #888;">Wellness</p>
+                          </div>
+                        </td>
+                        <td style="padding: 8px; text-align: center; width: 25%;">
+                          <div style="background: white; border-radius: 8px; padding: 10px;">
+                            <span style="font-size: 18px;">⏱</span>
+                            <p style="margin: 4px 0 0; font-size: 18px; font-weight: 700; color: #333;">${focusPoints}</p>
+                            <p style="margin: 2px 0 0; font-size: 10px; color: #888;">Focus</p>
+                          </div>
+                        </td>
+                        <td style="padding: 8px; text-align: center; width: 25%;">
+                          <div style="background: white; border-radius: 8px; padding: 10px;">
+                            <span style="font-size: 18px;">✨</span>
+                            <p style="margin: 4px 0 0; font-size: 18px; font-weight: 700; color: #333;">${otherPoints}</p>
+                            <p style="margin: 2px 0 0; font-size: 10px; color: #888;">Other</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
