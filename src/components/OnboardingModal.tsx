@@ -65,9 +65,9 @@ export function OnboardingModal() {
               <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
                 <Target className="w-5 h-5 text-primary mt-0.5" />
                 <div>
-                  <p className="font-medium text-sm">Focus Mode</p>
+                  <p className="font-medium text-sm">Start Small</p>
                   <p className="text-xs text-muted-foreground">
-                    Immersive sessions with calming backgrounds and timers to help you concentrate
+                    A productive day is a set of small focused periods. Pick a few important tasks — don't try to create a perfect plan upfront
                   </p>
                 </div>
               </div>
@@ -77,7 +77,7 @@ export function OnboardingModal() {
                 <div>
                   <p className="font-medium text-sm">Brain Dump</p>
                   <p className="text-xs text-muted-foreground">
-                    Quickly capture racing thoughts so they don't distract you
+                    Ideas come, distractions happen. Don't let them grab your attention — put them in the brain dump and think about them later
                   </p>
                 </div>
               </div>
@@ -85,9 +85,9 @@ export function OnboardingModal() {
               <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
                 <Heart className="w-5 h-5 text-primary mt-0.5" />
                 <div>
-                  <p className="font-medium text-sm">Gentle Reminders</p>
+                  <p className="font-medium text-sm">No Account Needed</p>
                   <p className="text-xs text-muted-foreground">
-                    Daily affirmations and wellness prompts to keep you balanced
+                    Just start using it! Your data stays safe in your browser. Only the optional summary email goes through the server
                   </p>
                 </div>
               </div>
