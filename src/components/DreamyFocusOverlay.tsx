@@ -238,32 +238,35 @@ export function DreamyFocusOverlay() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-8 px-4 max-w-md w-full">
-        {/* Timer with dreamy styling */}
-        <div className="dreamy-timer w-full">
-          <FocusTimer />
-        </div>
-
-        {/* Focused task card */}
-        <div 
-          className="w-full p-6 rounded-2xl backdrop-blur-md border border-white/20 animate-scale-in"
-          style={{
-            backgroundColor: `${focusedTask.color}20`,
-            boxShadow: `0 0 60px ${focusedTask.color}30, inset 0 1px 0 rgba(255,255,255,0.1)`,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div 
-              className="w-3 h-3 rounded-full animate-pulse"
-              style={{ backgroundColor: focusedTask.color }}
-            />
-            <span className="font-medium text-white text-lg">
-              {focusedTask.text}
-            </span>
+      <div className="relative z-10 flex flex-col items-center gap-6 px-4 w-full max-w-3xl">
+        {/* Timer and task card side by side */}
+        <div className="flex items-center gap-6 w-full">
+          {/* Compact timer */}
+          <div className="dreamy-timer-compact shrink-0">
+            <FocusTimer />
           </div>
-          <p className="text-white/60 text-sm mt-3">
-            Breathe. Focus. You've got this. ✨
-          </p>
+
+          {/* Focused task card */}
+          <div 
+            className="flex-1 p-5 rounded-2xl backdrop-blur-md border border-white/20 animate-scale-in"
+            style={{
+              backgroundColor: `${focusedTask.color}20`,
+              boxShadow: `0 0 60px ${focusedTask.color}30, inset 0 1px 0 rgba(255,255,255,0.1)`,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-3 h-3 rounded-full animate-pulse"
+                style={{ backgroundColor: focusedTask.color }}
+              />
+              <span className="font-medium text-white text-lg">
+                {focusedTask.text}
+              </span>
+            </div>
+            <p className="text-white/60 text-sm mt-3">
+              Breathe. Focus. You've got this. ✨
+            </p>
+          </div>
         </div>
 
         {/* Exit hint */}
