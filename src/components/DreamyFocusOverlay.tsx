@@ -220,12 +220,14 @@ export function DreamyFocusOverlay() {
                 {/* Background picker dropdown */}
                 {showBgPicker && (
                   <div 
-                    className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex gap-2 animate-scale-in"
+                    className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex gap-2 animate-scale-in z-[100] pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {BACKGROUNDS.map((bg) => (
                       <button
                         key={bg.id}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedBg(bg);
                           setShowBgPicker(false);
                         }}
