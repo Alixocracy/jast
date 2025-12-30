@@ -269,50 +269,94 @@
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 
-/* Dreamy focus mode timer overrides */
-.dreamy-timer .bg-card {
-  background: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Dreamy focus mode compact timer */
+.dreamy-timer-compact .bg-card {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: none;
-  padding: 1rem !important;
+  padding: 0.75rem !important;
+  border-radius: 1rem;
 }
 
-.dreamy-timer .text-4xl {
-  font-size: 2.5rem !important;
+.dreamy-timer-compact h2 {
+  display: none !important;
 }
 
-.dreamy-timer .text-foreground,
-.dreamy-timer .text-lg,
-.dreamy-timer .text-4xl {
+.dreamy-timer-compact .flex.gap-2.mb-6 {
+  margin-bottom: 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+.dreamy-timer-compact .flex.gap-2.mb-6 button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.7rem !important;
+}
+
+.dreamy-timer-compact svg.w-40 {
+  width: 100px !important;
+  height: 100px !important;
+}
+
+.dreamy-timer-compact svg.w-40 circle {
+  cx: 50;
+  cy: 50;
+  r: 44;
+}
+
+.dreamy-timer-compact .text-4xl {
+  font-size: 1.5rem !important;
+}
+
+.dreamy-timer-compact .mb-6:has(svg) {
+  margin-bottom: 0.5rem !important;
+}
+
+.dreamy-timer-compact .flex.gap-3 button {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.8rem !important;
+}
+
+.dreamy-timer-compact .flex.gap-3 button svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.dreamy-timer-compact .text-foreground,
+.dreamy-timer-compact .text-lg,
+.dreamy-timer-compact .text-4xl {
   color: white !important;
 }
 
-.dreamy-timer .text-muted-foreground {
+.dreamy-timer-compact .text-muted-foreground {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.dreamy-timer .bg-muted {
+.dreamy-timer-compact .bg-muted {
   background: rgba(255, 255, 255, 0.1) !important;
 }
 
-.dreamy-timer .bg-primary {
+.dreamy-timer-compact .bg-primary {
   background: rgba(255, 255, 255, 0.25) !important;
 }
 
-.dreamy-timer .text-primary-foreground {
+.dreamy-timer-compact .text-primary-foreground {
   color: white !important;
 }
 
-.dreamy-timer .text-primary {
+.dreamy-timer-compact .text-primary {
   color: hsl(45, 60%, 80%) !important;
 }
 
-.dreamy-timer button[class*="outline"] {
+.dreamy-timer-compact button[class*="outline"] {
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: white !important;
 }
 
-.dreamy-timer button[class*="outline"]:hover {
+.dreamy-timer-compact button[class*="outline"]:hover {
   background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dreamy-timer-compact p.animate-pulse-gentle {
+  display: none !important;
 }
