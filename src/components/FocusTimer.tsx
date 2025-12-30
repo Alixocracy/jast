@@ -121,7 +121,7 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
             </>
           )}
         </Button>
-        <Button variant="outline" size="lg" onClick={resetTimer}>
+        <Button variant="ghost" size="lg" onClick={resetTimer} className="border border-input">
           <RotateCcw className="w-5 h-5" />
         </Button>
       </div>

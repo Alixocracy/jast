@@ -172,84 +172,86 @@ export function DreamyFocusOverlay() {
         <X className="w-5 h-5" />
       </button>
 
-      {/* Horizontal Control Panel - Top Center */}
-      <div className="relative z-10 flex justify-center pt-6">
+      {/* Horizontal Control Panel - Centered */}
+      <div className="relative z-10 flex-1 flex items-center justify-center">
         <div 
-          className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/20 backdrop-blur-md border border-white/10"
+          className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Audio toggle */}
-          <button
-            onClick={() => {
-              setIsMuted(!isMuted);
-              if (isMuted && audioRef.current?.paused) {
-                audioRef.current.play().catch(() => {});
-              }
-            }}
-            className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-all"
-            aria-label={isMuted ? "Unmute music" : "Mute music"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
-
-          {/* Divider */}
-          <div className="w-px h-6 bg-white/20" />
-
-          {/* Inline Timer */}
-          <div className="dreamy-timer-inline">
+          {/* Timer with layout based on sketch: display on left, controls on right */}
+          <div className="dreamy-timer-panel">
             <FocusTimer />
           </div>
 
           {/* Divider */}
-          <div className="w-px h-6 bg-white/20" />
+          <div className="w-px h-16 bg-white/20" />
 
-          {/* Background picker */}
-          <div className="relative">
-            <button
-              onClick={() => setShowBgPicker(!showBgPicker)}
-              className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-all"
-              aria-label="Change background"
-            >
-              <Image className="w-5 h-5" />
-            </button>
-
-            {/* Background picker dropdown */}
-            {showBgPicker && (
-              <div 
-                className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex gap-2 animate-scale-in"
+          {/* Additional controls */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              {/* Audio toggle */}
+              <button
+                onClick={() => {
+                  setIsMuted(!isMuted);
+                  if (isMuted && audioRef.current?.paused) {
+                    audioRef.current.play().catch(() => {});
+                  }
+                }}
+                className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                aria-label={isMuted ? "Unmute music" : "Mute music"}
               >
-                {BACKGROUNDS.map((bg) => (
-                  <button
-                    key={bg.id}
-                    onClick={() => {
-                      setSelectedBg(bg);
-                      setShowBgPicker(false);
-                    }}
-                    className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedBg.id === bg.id 
-                        ? "border-white scale-105" 
-                        : "border-transparent hover:border-white/50"
-                    }`}
-                    aria-label={bg.name}
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+
+              {/* Background picker */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowBgPicker(!showBgPicker)}
+                  className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                  aria-label="Change background"
+                >
+                  <Image className="w-4 h-4" />
+                </button>
+
+                {/* Background picker dropdown */}
+                {showBgPicker && (
+                  <div 
+                    className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex gap-2 animate-scale-in"
                   >
-                    <img 
-                      src={bg.src} 
-                      alt={bg.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+                    {BACKGROUNDS.map((bg) => (
+                      <button
+                        key={bg.id}
+                        onClick={() => {
+                          setSelectedBg(bg);
+                          setShowBgPicker(false);
+                        }}
+                        className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedBg.id === bg.id 
+                            ? "border-white scale-105" 
+                            : "border-transparent hover:border-white/50"
+                        }`}
+                        aria-label={bg.name}
+                      >
+                        <img 
+                          src={bg.src} 
+                          alt={bg.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Task Card - Below Center */}
-      <div className="relative z-10 flex-1 flex items-end justify-center pb-[25%]">
-        <div className="px-4 w-full max-w-md">
+      {/* Task Card - Lower portion */}
+      <div className="relative z-10 pb-[15%]">
+        <div className="flex justify-center px-4">
           <div 
-            className="p-5 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in"
+            className="p-5 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in max-w-md w-full"
             style={{
               backgroundColor: `${focusedTask.color}15`,
               boxShadow: `0 0 40px ${focusedTask.color}20`,
@@ -268,12 +270,11 @@ export function DreamyFocusOverlay() {
               Breathe. Focus. You've got this. ✨
             </p>
           </div>
-
-          {/* Exit hint */}
-          <p className="text-white/30 text-xs text-center mt-4">
-            Press ESC to exit focus mode
-          </p>
         </div>
+        {/* Exit hint */}
+        <p className="text-white/30 text-xs text-center mt-4">
+          Press ESC to exit focus mode
+        </p>
       </div>
     </div>
   );
