@@ -1,6 +1,9 @@
 import { Sparkles } from "lucide-react";
+import { useUserName } from "./OnboardingModal";
 
 export function Header() {
+  const { userName } = useUserName();
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -23,11 +26,11 @@ export function Header() {
         <div className="w-10 h-10 rounded-xl gradient-calm flex items-center justify-center shadow-soft">
           <Sparkles className="w-5 h-5 text-primary" />
         </div>
-        <span className="text-sm font-medium text-muted-foreground">JAST: Just A Lovable App!</span>
+        <span className="text-sm font-medium text-muted-foreground">JAST: Your Personal Wellbeing Assistant</span>
       </div>
       
       <h1 className="text-3xl font-semibold text-foreground mb-1">
-        {getGreeting()} {getTimeEmoji()}
+        {getGreeting()}{userName ? `, ${userName}` : ""} {getTimeEmoji()}
       </h1>
       <p className="text-muted-foreground">
         Let's make today manageable, one step at a time.
