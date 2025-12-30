@@ -367,18 +367,26 @@
   background: rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Reset button - match audio/image button style */
-.dreamy-timer-panel .flex.gap-3 button[class*="ghost"] {
+/* Reset button - match audio/image button style exactly */
+.dreamy-timer-panel .flex.gap-3 button.border {
   background: rgba(255, 255, 255, 0.1) !important;
   border: none !important;
+  border-color: transparent !important;
   color: rgba(255, 255, 255, 0.7) !important;
   padding: 0.5rem !important;
   border-radius: 0.5rem !important;
   height: auto !important;
   width: auto !important;
+  min-width: 0 !important;
 }
 
-.dreamy-timer-panel .flex.gap-3 button[class*="ghost"]:hover {
+.dreamy-timer-panel .flex.gap-3 button.border:hover {
   background: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
+}
+
+.dreamy-timer-panel .flex.gap-3 button.border svg {
+  width: 1rem !important;
+  height: 1rem !important;
+  color: inherit !important;
 }
