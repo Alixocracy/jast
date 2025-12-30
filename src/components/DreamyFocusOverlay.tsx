@@ -172,8 +172,8 @@ export function DreamyFocusOverlay() {
         <X className="w-5 h-5" />
       </button>
 
-      {/* Horizontal Control Panel - Upper area */}
-      <div className="relative z-10 flex justify-center pt-[15%]">
+      {/* Horizontal Control Panel - Top of page */}
+      <div className="relative z-10 flex justify-center pt-8">
         <div 
           className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10"
           onClick={(e) => e.stopPropagation()}
@@ -249,20 +249,21 @@ export function DreamyFocusOverlay() {
 
       {/* Task Card - Lower portion */}
       <div className="relative z-10 flex-1 flex items-end justify-center pb-[20%]">
-        <div className="flex justify-center px-4">
+        <div className="px-4">
           <div 
-            className="p-5 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in max-w-md w-full"
+            className="p-6 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in"
             style={{
               backgroundColor: `${focusedTask.color}15`,
               boxShadow: `0 0 40px ${focusedTask.color}20`,
+              minWidth: '400px',
             }}
           >
             <div className="flex items-center gap-3">
               <div 
-                className="w-3 h-3 rounded-full animate-pulse"
+                className="w-4 h-4 rounded-full animate-pulse"
                 style={{ backgroundColor: focusedTask.color }}
               />
-              <span className="font-medium text-white text-lg">
+              <span className="font-medium text-white text-xl">
                 {focusedTask.text}
               </span>
             </div>
