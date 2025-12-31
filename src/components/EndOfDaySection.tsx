@@ -131,7 +131,7 @@ export function EndOfDaySection() {
       </div>
 
       <p className="text-sm text-muted-foreground mb-4">
-        Ready to wrap up? Get a beautiful summary of today sent to your email.
+        Ready to wrap up? Get a brief summary of today sent to your email.
       </p>
 
       <div className="space-y-4">

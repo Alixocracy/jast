@@ -1,6 +1,7 @@
 ![JAST hero](public/JAST-here.png)
 
-# JAST – Your Personal Wellbeing Assistant
+# JAST – Just A Lovable App
+## Your Personal Wellbeing Assistant
 
 JAST keeps you focused, organized, and kind to yourself. It pairs a calming interface with practical tools like focus timers, quick actions, task lists, brain dumps, and end-of-day reflections. Data stays in your browser by default—no account required.
 
