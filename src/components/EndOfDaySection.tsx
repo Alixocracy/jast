@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Moon, Mail, RefreshCw, Check, Loader2, Clipboard, FileText, ChevronDown } from "lucide-react";
+import { Moon, Mail, RefreshCw, Check, Loader2, Clipboard, FileText, ChevronDown, Download } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserName } from "@/contexts/UserNameContext";
@@ -211,6 +211,26 @@ export function EndOfDaySection() {
     }
   };
 
+  const handleDownloadMarkdown = () => {
+    try {
+      const markdown = buildMarkdownSummary();
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const dateSlug = new Date().toISOString().split("T")[0];
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `jast-daily-summary-${dateSlug}.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Markdown summary downloaded");
+    } catch (error: any) {
+      console.error("Error downloading markdown:", error);
+      toast.error(error.message || "Unable to download markdown. Please try again.");
+    }
+  };
+
   const [keepUndoneTasks, setKeepUndoneTasks] = useState(true);
 
   const handleReset = () => {
@@ -314,7 +334,7 @@ export function EndOfDaySection() {
             <p className="text-xs text-muted-foreground">
               Generates a markdown recap with your points, tasks, and brain dump notes.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button 
                 variant="secondary"
                 onClick={handleCopyMarkdown}
@@ -330,6 +350,15 @@ export function EndOfDaySection() {
                   <Clipboard className="w-4 h-4" />
                 )}
                 {markdownCopied ? "Copied" : "Copy .md"}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleDownloadMarkdown}
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download .md
               </Button>
             </div>
           </div>
