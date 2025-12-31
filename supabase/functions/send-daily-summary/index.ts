@@ -2,11 +2,19 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+// Only allow calls from the deployed app 
+const ALLOWED_ORIGINS = [
+  "https://jast.lovable.app",
+];
+
+const isAllowedOrigin = (origin: string | null) =>
+  !!origin && ALLOWED_ORIGINS.some((allowed) => origin.startsWith(allowed));
+
+const buildCorsHeaders = (origin: string) => ({
+  "Access-Control-Allow-Origin": origin,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
-};
+});
 
 interface Task {
   id: string;
@@ -37,6 +45,15 @@ interface DailySummaryRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const origin = req.headers.get("origin") || "";
+
+  // Block requests that do not come from the approved origins
+  if (!isAllowedOrigin(origin)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  const corsHeaders = buildCorsHeaders(origin);
+
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -311,13 +328,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify({ success: true, data: emailResponse }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
+    return new Response(
+      JSON.stringify({ success: true, data: emailResponse }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
       },
-    });
+    );
   } catch (error: any) {
     console.error("Error in send-daily-summary function:", error);
     return new Response(
