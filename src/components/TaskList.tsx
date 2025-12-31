@@ -29,6 +29,7 @@ const TASK_COLORS = [
 ];
 
 const STORAGE_KEY = "focusflow-tasks";
+const FOCUS_HINT_KEY = "focusflow-focus-hint-seen-v2";
 
 const getStoredTasks = (): Task[] => {
   try {
@@ -55,6 +56,8 @@ export function TaskList() {
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0].value);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [showFocusHint, setShowFocusHint] = useState(false);
+  const [focusHintTaskId, setFocusHintTaskId] = useState<string | null>(null);
   const { addPoints } = usePointsContext();
   const { setFocusedTask, focusedTask } = useFocusMode();
 
@@ -65,12 +68,38 @@ export function TaskList() {
       text: task.text,
       color: task.color,
     });
+    if (showFocusHint) {
+      localStorage.setItem(FOCUS_HINT_KEY, "true");
+      setShowFocusHint(false);
+    }
     toast.success("Focus mode activated! 🎯");
   };
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
+
+  // On first visit, highlight the first incomplete task's focus icon
+  useEffect(() => {
+    const hasSeenHint = localStorage.getItem(FOCUS_HINT_KEY) === "true";
+    if (hasSeenHint) return;
+
+    // If hint already active, ensure it stays targeted to the first available task
+    if (showFocusHint) {
+      const currentTarget = tasks.find((t) => !t.completed && t.id === focusHintTaskId);
+      if (!currentTarget) {
+        const next = tasks.find((t) => !t.completed);
+        setFocusHintTaskId(next ? next.id : null);
+      }
+      return;
+    }
+
+    const firstIncomplete = tasks.find((t) => !t.completed);
+    if (firstIncomplete) {
+      setFocusHintTaskId(firstIncomplete.id);
+      setShowFocusHint(true);
+    }
+  }, [focusHintTaskId, showFocusHint, tasks]);
 
   const addTask = () => {
     if (newTask.trim()) {
@@ -211,11 +240,20 @@ export function TaskList() {
             {!task.completed && (
               <button
                 onClick={() => handleFocusTask(task)}
-                className={`opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded-md ${
+                className={`transition-all duration-200 p-1 rounded-md ${
                   focusedTask?.id === task.id 
                     ? "opacity-100 text-primary" 
                     : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                } ${
+                  showFocusHint && focusHintTaskId === task.id
+                    ? "opacity-100 ring-2 ring-primary/60 bg-primary/10 animate-pulse"
+                    : "opacity-0 group-hover:opacity-100"
                 }`}
+                style={
+                  showFocusHint && focusHintTaskId === task.id
+                    ? { animationDuration: "1.8s" }
+                    : undefined
+                }
                 title="Focus on this task"
               >
                 <Target className="w-4 h-4" />
