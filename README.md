@@ -19,8 +19,8 @@ JAST keeps you focused, organized, and kind to yourself. It pairs a calming inte
 
 ## Setup
 ```sh
-git clone <your_repo_url>
-cd <your_project_folder>
+git clone https://github.com/Alixocracy/jast.git
+cd jast
 npm install
 npm run dev
 ```
