@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Sparkles, Palette, Target } from "lucide-react";
+import { Plus, Check, Sparkles, Palette, Target, GripVertical } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -58,6 +58,8 @@ export function TaskList() {
   const [editText, setEditText] = useState("");
   const [showFocusHint, setShowFocusHint] = useState(false);
   const [focusHintTaskId, setFocusHintTaskId] = useState<string | null>(null);
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
   const { addPoints } = usePointsContext();
   const { setFocusedTask, focusedTask } = useFocusMode();
 
@@ -160,6 +162,46 @@ export function TaskList() {
     setEditText("");
   };
 
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", taskId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, taskId: string) => {
+    e.preventDefault();
+    if (draggedTaskId && draggedTaskId !== taskId) {
+      setDragOverTaskId(taskId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverTaskId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetTaskId: string) => {
+    e.preventDefault();
+    if (!draggedTaskId || draggedTaskId === targetTaskId) return;
+
+    const draggedIndex = tasks.findIndex((t) => t.id === draggedTaskId);
+    const targetIndex = tasks.findIndex((t) => t.id === targetTaskId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const newTasks = [...tasks];
+    const [draggedTask] = newTasks.splice(draggedIndex, 1);
+    newTasks.splice(targetIndex, 0, draggedTask);
+
+    setTasks(newTasks);
+    setDraggedTaskId(null);
+    setDragOverTaskId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTaskId(null);
+    setDragOverTaskId(null);
+  };
+
   const completedCount = tasks.filter((t) => t.completed).length;
 
   return (
@@ -184,14 +226,25 @@ export function TaskList() {
         {tasks.map((task) => (
           <div
             key={task.id}
-            className={`group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 ${
+            draggable={editingId !== task.id}
+            onDragStart={(e) => handleDragStart(e, task.id)}
+            onDragOver={(e) => handleDragOver(e, task.id)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, task.id)}
+            onDragEnd={handleDragEnd}
+            className={`group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-grab active:cursor-grabbing ${
               focusedTask?.id === task.id ? "ring-2 ring-primary ring-offset-2" : ""
+            } ${draggedTaskId === task.id ? "opacity-50" : ""} ${
+              dragOverTaskId === task.id ? "border-primary border-2" : ""
             }`}
             style={{
               backgroundColor: task.completed ? undefined : `${task.color}20`,
-              borderColor: task.completed ? undefined : `${task.color}40`,
+              borderColor: dragOverTaskId === task.id ? undefined : (task.completed ? undefined : `${task.color}40`),
             }}
           >
+            <div className="flex-shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab">
+              <GripVertical className="w-4 h-4" />
+            </div>
             <button
               onClick={() => toggleTask(task.id)}
               className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
