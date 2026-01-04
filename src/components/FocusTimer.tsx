@@ -10,16 +10,18 @@ interface FocusTimerProps {
 export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
   const { isFocusMode, initialTimerSeconds, setInitialTimerSeconds, isTimerRunning, setIsTimerRunning } = useFocusMode();
   
-  const [timeLeft, setTimeLeft] = useState(defaultMinutes * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState(defaultMinutes);
+  // Initialize from context values so timer persists across focus mode transitions
+  const [timeLeft, setTimeLeft] = useState(() => initialTimerSeconds);
+  const [isRunning, setIsRunning] = useState(() => isTimerRunning);
+  const [selectedDuration, setSelectedDuration] = useState(() => Math.ceil(initialTimerSeconds / 60));
   const [isEditing, setIsEditing] = useState(false);
   const [customTime, setCustomTime] = useState("");
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const alarmTimeoutsRef = useRef<number[]>([]);
   const previousTimeLeftRef = useRef(timeLeft);
-  const previousFocusModeRef = useRef(false);
+  const previousFocusModeRef = useRef(isFocusMode);
   const wasRunningBeforeEditRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
   const durations = [5, 15, 25, 45];
 
@@ -64,9 +66,17 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
     alarmTimeoutsRef.current = timeouts;
   }, [playAlarmOnce, stopAlarm]);
 
-  // When entering focus mode, use the shared timer value from context
+  // Sync from context when component mounts or when transitioning focus modes
   useEffect(() => {
     const wasFocusMode = previousFocusModeRef.current;
+    
+    // Skip on first render since we initialized from context
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      previousFocusModeRef.current = isFocusMode;
+      return;
+    }
+    
     if (isFocusMode && !wasFocusMode) {
       // Entering focus mode: use the timer value and running state from context
       setTimeLeft(initialTimerSeconds);
