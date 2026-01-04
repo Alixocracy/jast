@@ -78,10 +78,10 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
     }
     
     if (isFocusMode && !wasFocusMode) {
-      // Entering focus mode: use the timer value and running state from context
+      // Entering focus mode: use the timer value from context and always start running
       setTimeLeft(initialTimerSeconds);
       setSelectedDuration(Math.ceil(initialTimerSeconds / 60));
-      setIsRunning(isTimerRunning);
+      setIsRunning(true);
     } else if (!isFocusMode && wasFocusMode) {
       // Exiting focus mode: save current state to context, keep timer running if it was
       stopAlarm();
