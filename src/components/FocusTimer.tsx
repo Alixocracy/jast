@@ -91,13 +91,11 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
     previousFocusModeRef.current = isFocusMode;
   }, [isFocusMode, initialTimerSeconds, stopAlarm, isTimerRunning, setIsTimerRunning, isRunning, timeLeft, setInitialTimerSeconds]);
 
-  // When not in focus mode, sync timer changes to context for focus mode to pick up
+  // Sync timer state to context so it persists across focus mode transitions (including unmount)
   useEffect(() => {
-    if (!isFocusMode) {
-      setInitialTimerSeconds(timeLeft);
-      setIsTimerRunning(isRunning);
-    }
-  }, [timeLeft, isRunning, isFocusMode, setInitialTimerSeconds, setIsTimerRunning]);
+    setInitialTimerSeconds(timeLeft);
+    setIsTimerRunning(isRunning);
+  }, [timeLeft, isRunning, setInitialTimerSeconds, setIsTimerRunning]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
