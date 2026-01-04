@@ -8,7 +8,7 @@ interface FocusTimerProps {
 }
 
 export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
-  const { isFocusMode, initialTimerSeconds, setInitialTimerSeconds } = useFocusMode();
+  const { isFocusMode, initialTimerSeconds, setInitialTimerSeconds, isTimerRunning, setIsTimerRunning } = useFocusMode();
   
   const [timeLeft, setTimeLeft] = useState(defaultMinutes * 60);
   const [isRunning, setIsRunning] = useState(false);
@@ -68,24 +68,26 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
   useEffect(() => {
     const wasFocusMode = previousFocusModeRef.current;
     if (isFocusMode && !wasFocusMode) {
-      // Entering focus mode: use the timer value from context and start
+      // Entering focus mode: use the timer value and running state from context
       setTimeLeft(initialTimerSeconds);
       setSelectedDuration(Math.ceil(initialTimerSeconds / 60));
-      setIsRunning(true);
+      setIsRunning(isTimerRunning);
     } else if (!isFocusMode && wasFocusMode) {
-      // Exiting focus mode: stop any alarms and pause the timer
+      // Exiting focus mode: save current state to context, keep timer running if it was
       stopAlarm();
-      setIsRunning(false);
+      setIsTimerRunning(isRunning);
+      setInitialTimerSeconds(timeLeft);
     }
     previousFocusModeRef.current = isFocusMode;
-  }, [isFocusMode, initialTimerSeconds, stopAlarm]);
+  }, [isFocusMode, initialTimerSeconds, stopAlarm, isTimerRunning, setIsTimerRunning, isRunning, timeLeft, setInitialTimerSeconds]);
 
   // When not in focus mode, sync timer changes to context for focus mode to pick up
   useEffect(() => {
     if (!isFocusMode) {
       setInitialTimerSeconds(timeLeft);
+      setIsTimerRunning(isRunning);
     }
-  }, [timeLeft, isFocusMode, setInitialTimerSeconds]);
+  }, [timeLeft, isRunning, isFocusMode, setInitialTimerSeconds, setIsTimerRunning]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

@@ -12,6 +12,8 @@ interface FocusModeContextType {
   isFocusMode: boolean;
   initialTimerSeconds: number;
   setInitialTimerSeconds: (seconds: number) => void;
+  isTimerRunning: boolean;
+  setIsTimerRunning: (running: boolean) => void;
 }
 
 const FocusModeContext = createContext<FocusModeContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ const FocusModeContext = createContext<FocusModeContextType | undefined>(undefin
 export function FocusModeProvider({ children }: { children: ReactNode }) {
   const [focusedTask, setFocusedTask] = useState<FocusedTask | null>(null);
   const [initialTimerSeconds, setInitialTimerSeconds] = useState(25 * 60);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   return (
     <FocusModeContext.Provider value={{
@@ -27,6 +30,8 @@ export function FocusModeProvider({ children }: { children: ReactNode }) {
       isFocusMode: focusedTask !== null,
       initialTimerSeconds,
       setInitialTimerSeconds,
+      isTimerRunning,
+      setIsTimerRunning,
     }}>
       {children}
     </FocusModeContext.Provider>
