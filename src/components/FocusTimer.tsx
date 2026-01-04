@@ -12,7 +12,8 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
   
   // Initialize from context values so timer persists across focus mode transitions
   const [timeLeft, setTimeLeft] = useState(() => initialTimerSeconds);
-  const [isRunning, setIsRunning] = useState(() => isTimerRunning);
+  // In focus mode we always auto-start, regardless of main page running state
+  const [isRunning, setIsRunning] = useState(() => (isFocusMode ? true : isTimerRunning));
   const [selectedDuration, setSelectedDuration] = useState(() => Math.ceil(initialTimerSeconds / 60));
   const [isEditing, setIsEditing] = useState(false);
   const [customTime, setCustomTime] = useState("");
