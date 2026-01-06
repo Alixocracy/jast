@@ -1,0 +1,360 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Youtube, Link, X, Play, Pause, RotateCcw } from "lucide-react";
+
+interface YouTubeAudioPlayerProps {
+  isActive: boolean;
+  isMuted: boolean;
+  onActiveChange: (active: boolean) => void;
+}
+
+// Extract video ID from various YouTube URL formats
+function extractVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /^([a-zA-Z0-9_-]{11})$/, // Direct video ID
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+// Extract playlist ID from YouTube URL
+function extractPlaylistId(url: string): string | null {
+  const match = url.match(/[?&]list=([^&\n?#]+)/);
+  return match ? match[1] : null;
+}
+
+export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTubeAudioPlayerProps) {
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [showInput, setShowInput] = useState(false);
+  const [videoId, setVideoId] = useState<string | null>(null);
+  const [playlistId, setPlaylistId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const playerRef = useRef<YT.Player | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
+
+  // Initialize player when video/playlist is set
+  useEffect(() => {
+    if (!videoId && !playlistId) return;
+    if (!window.YT?.Player) {
+      // Wait for API to load
+      const checkReady = setInterval(() => {
+        if (window.YT?.Player) {
+          clearInterval(checkReady);
+          initPlayer();
+        }
+      }, 100);
+      return () => clearInterval(checkReady);
+    } else {
+      initPlayer();
+    }
+
+    function initPlayer() {
+      // Destroy existing player
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+
+      const playerVars: YT.PlayerVars = {
+        autoplay: 1,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        rel: 0,
+        showinfo: 0,
+        loop: 1,
+      };
+
+      if (playlistId) {
+        playerVars.listType = "playlist";
+        playerVars.list = playlistId;
+      }
+
+      playerRef.current = new window.YT.Player("youtube-player", {
+        height: "1",
+        width: "1",
+        videoId: videoId || undefined,
+        playerVars,
+        events: {
+          onReady: (event) => {
+            event.target.setVolume(30);
+            if (isMuted) {
+              event.target.mute();
+            }
+            event.target.playVideo();
+            setIsPlaying(true);
+          },
+          onStateChange: (event) => {
+            // Loop single video when it ends
+            if (event.data === window.YT.PlayerState.ENDED && videoId && !playlistId) {
+              event.target.seekTo(0, true);
+              event.target.playVideo();
+            }
+          },
+          onError: (event) => {
+            console.error("YouTube player error:", event.data);
+            setError("Failed to load video. Please check the URL.");
+          },
+        },
+      });
+    }
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+    };
+  }, [videoId, playlistId]);
+
+  // Handle mute changes
+  useEffect(() => {
+    if (playerRef.current) {
+      try {
+        if (isMuted) {
+          playerRef.current.mute();
+        } else {
+          playerRef.current.unMute();
+        }
+      } catch (e) {
+        // Player not ready yet
+      }
+    }
+  }, [isMuted]);
+
+  // Cleanup when not active
+  useEffect(() => {
+    if (!isActive && playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+      setVideoId(null);
+      setPlaylistId(null);
+      setYoutubeUrl("");
+    }
+  }, [isActive]);
+
+  const handleSubmit = useCallback(() => {
+    setError(null);
+    const vid = extractVideoId(youtubeUrl);
+    const pid = extractPlaylistId(youtubeUrl);
+
+    if (!vid && !pid) {
+      setError("Invalid YouTube URL. Please enter a valid video or playlist link.");
+      return;
+    }
+
+    setVideoId(vid);
+    setPlaylistId(pid);
+    setShowInput(false);
+    onActiveChange(true);
+  }, [youtubeUrl, onActiveChange]);
+
+  const handleClear = useCallback(() => {
+    if (playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+    setVideoId(null);
+    setPlaylistId(null);
+    setYoutubeUrl("");
+    setError(null);
+    onActiveChange(false);
+  }, [onActiveChange]);
+
+  const togglePlayPause = useCallback(() => {
+    if (playerRef.current) {
+      try {
+        if (isPlaying) {
+          playerRef.current.pauseVideo();
+          setIsPlaying(false);
+        } else {
+          playerRef.current.playVideo();
+          setIsPlaying(true);
+        }
+      } catch (e) {
+        // Player not ready
+      }
+    }
+  }, [isPlaying]);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      {/* Hidden YouTube player */}
+      <div 
+        id="youtube-player" 
+        className="absolute -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* YouTube button / controls */}
+      {isActive && (videoId || playlistId) ? (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={togglePlayPause}
+            className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all"
+            aria-label={isPlaying ? "Pause YouTube" : "Play YouTube"}
+          >
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={handleClear}
+            className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+            aria-label="Stop YouTube and use local audio"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowInput(!showInput)}
+          className={`p-2 rounded-lg transition-all ${
+            showInput 
+              ? "bg-red-500/30 text-red-400" 
+              : "bg-white/10 text-white/70 hover:text-white hover:bg-white/20"
+          }`}
+          aria-label="Add YouTube audio"
+        >
+          <Youtube className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* URL input dropdown */}
+      {showInput && (
+        <div 
+          className="absolute top-full mt-2 right-0 p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in z-[100] w-72"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Link className="w-4 h-4 text-white/50" />
+            <span className="text-white/70 text-sm">YouTube URL</span>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSubmit();
+                if (e.key === "Escape") setShowInput(false);
+              }}
+              placeholder="Paste video or playlist link..."
+              className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-white/40"
+              autoFocus
+            />
+            <button
+              onClick={handleSubmit}
+              className="px-3 py-2 rounded-lg bg-red-500/80 text-white text-sm hover:bg-red-500 transition-all"
+            >
+              Play
+            </button>
+          </div>
+          {error && (
+            <p className="text-red-400 text-xs mt-2">{error}</p>
+          )}
+          <p className="text-white/40 text-xs mt-2">
+            Works with videos & playlists
+          </p>
+          <button
+            onClick={() => setShowInput(false)}
+            className="absolute top-2 right-2 p-1 text-white/40 hover:text-white/70"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// YouTube IFrame API type declarations
+declare global {
+  interface Window {
+    YT: typeof YT;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+
+  namespace YT {
+    class Player {
+      constructor(
+        elementId: string | HTMLElement,
+        options: PlayerOptions
+      );
+      playVideo(): void;
+      pauseVideo(): void;
+      stopVideo(): void;
+      seekTo(seconds: number, allowSeekAhead: boolean): void;
+      mute(): void;
+      unMute(): void;
+      setVolume(volume: number): void;
+      getVolume(): number;
+      destroy(): void;
+    }
+
+    interface PlayerOptions {
+      height?: string | number;
+      width?: string | number;
+      videoId?: string;
+      playerVars?: PlayerVars;
+      events?: PlayerEvents;
+    }
+
+    interface PlayerVars {
+      autoplay?: 0 | 1;
+      controls?: 0 | 1;
+      disablekb?: 0 | 1;
+      fs?: 0 | 1;
+      modestbranding?: 0 | 1;
+      rel?: 0 | 1;
+      showinfo?: 0 | 1;
+      loop?: 0 | 1;
+      listType?: "playlist" | "user_uploads";
+      list?: string;
+      playlist?: string;
+    }
+
+    interface PlayerEvents {
+      onReady?: (event: PlayerEvent) => void;
+      onStateChange?: (event: OnStateChangeEvent) => void;
+      onError?: (event: OnErrorEvent) => void;
+    }
+
+    interface PlayerEvent {
+      target: Player;
+    }
+
+    interface OnStateChangeEvent {
+      target: Player;
+      data: PlayerState;
+    }
+
+    interface OnErrorEvent {
+      target: Player;
+      data: number;
+    }
+
+    enum PlayerState {
+      UNSTARTED = -1,
+      ENDED = 0,
+      PLAYING = 1,
+      PAUSED = 2,
+      BUFFERING = 3,
+      CUED = 5,
+    }
+  }
+}

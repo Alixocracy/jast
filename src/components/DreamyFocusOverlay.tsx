@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
-import { X, Volume2, VolumeX, Image } from "lucide-react";
+import { YouTubeAudioPlayer } from "./YouTubeAudioPlayer";
+import { X, Volume2, VolumeX, Image, Music } from "lucide-react";
 
 // Import background images
 import mistyForest from "@/assets/backgrounds/misty-forest.png";
@@ -45,6 +46,7 @@ export function DreamyFocusOverlay() {
   const [isMuted, setIsMuted] = useState(false);
   const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0]);
   const [showBgPicker, setShowBgPicker] = useState(false);
+  const [isYouTubeActive, setIsYouTubeActive] = useState(false);
 
   // Memoize particles so they don't regenerate on every render
   const dustParticles = useMemo(() => generateDustParticles(), []);
@@ -66,9 +68,9 @@ export function DreamyFocusOverlay() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFocusMode, exitFocusMode]);
 
-  // Handle audio playback
+  // Handle local audio playback (only when YouTube is not active)
   useEffect(() => {
-    if (isFocusMode) {
+    if (isFocusMode && !isYouTubeActive) {
       if (!audioRef.current) {
         audioRef.current = new Audio("/audio/dreamer.mp3");
         audioRef.current.loop = true;
@@ -97,7 +99,7 @@ export function DreamyFocusOverlay() {
         audioRef.current.pause();
       }
     };
-  }, [isFocusMode]);
+  }, [isFocusMode, isYouTubeActive]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -105,9 +107,9 @@ export function DreamyFocusOverlay() {
     }
   }, [isMuted]);
 
-  // Attempt to play audio on any click (for browsers that block autoplay)
+  // Attempt to play local audio on any click (for browsers that block autoplay)
   const handleOverlayClick = () => {
-    if (audioRef.current && audioRef.current.paused && !isMuted) {
+    if (!isYouTubeActive && audioRef.current && audioRef.current.paused && !isMuted) {
       audioRef.current.play().catch(() => {});
     }
     setShowBgPicker(false);
@@ -220,7 +222,7 @@ export function DreamyFocusOverlay() {
               <button
                 onClick={() => {
                   setIsMuted(!isMuted);
-                  if (isMuted && audioRef.current?.paused) {
+                  if (isMuted && !isYouTubeActive && audioRef.current?.paused) {
                     audioRef.current.play().catch(() => {});
                   }
                 }}
@@ -229,6 +231,20 @@ export function DreamyFocusOverlay() {
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </button>
+
+              {/* Local audio indicator (when not using YouTube) */}
+              {!isYouTubeActive && (
+                <div className="p-2 rounded-lg bg-white/10 text-white/50" title="Playing local audio">
+                  <Music className="w-4 h-4" />
+                </div>
+              )}
+
+              {/* YouTube audio player */}
+              <YouTubeAudioPlayer
+                isActive={isYouTubeActive}
+                isMuted={isMuted}
+                onActiveChange={setIsYouTubeActive}
+              />
 
               {/* Background picker */}
               <div className="relative">
