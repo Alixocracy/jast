@@ -1,11 +1,20 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Youtube, Link, X, Play, Pause, RotateCcw } from "lucide-react";
+import { Youtube, Link, X, Play, Pause, RotateCcw, ListMusic, SkipForward } from "lucide-react";
 
 interface YouTubeAudioPlayerProps {
   isActive: boolean;
   isMuted: boolean;
   onActiveChange: (active: boolean) => void;
 }
+
+// Default playlist of sample YouTube videos
+const DEFAULT_PLAYLIST = [
+  { id: "cKxRFlXYquo", title: "Lofi 1" },
+  { id: "RG2IK8oRZNA", title: "Lofi 2" },
+  { id: "k2w_tU8Cy9c", title: "Lofi 3" },
+  { id: "k9ts6p63ns0", title: "Lofi 4" },
+  { id: "sAcj8me7wGI", title: "Lofi 5" },
+];
 
 // Extract video ID from various YouTube URL formats
 function extractVideoId(url: string): string | null {
@@ -34,6 +43,8 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   const [playlistId, setPlaylistId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingDefaultPlaylist, setUsingDefaultPlaylist] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const playerRef = useRef<YT.Player | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -101,10 +112,18 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
             setIsPlaying(true);
           },
           onStateChange: (event) => {
-            // Loop single video when it ends
-            if (event.data === window.YT.PlayerState.ENDED && videoId && !playlistId) {
-              event.target.seekTo(0, true);
-              event.target.playVideo();
+            // Handle video end - loop or go to next in default playlist
+            if (event.data === window.YT.PlayerState.ENDED) {
+              if (usingDefaultPlaylist) {
+                // Go to next track in default playlist
+                const nextIndex = (currentTrackIndex + 1) % DEFAULT_PLAYLIST.length;
+                setCurrentTrackIndex(nextIndex);
+                setVideoId(DEFAULT_PLAYLIST[nextIndex].id);
+              } else if (videoId && !playlistId) {
+                // Loop single video
+                event.target.seekTo(0, true);
+                event.target.playVideo();
+              }
             }
           },
           onError: (event) => {
@@ -159,11 +178,30 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       return;
     }
 
+    setUsingDefaultPlaylist(false);
     setVideoId(vid);
     setPlaylistId(pid);
     setShowInput(false);
     onActiveChange(true);
   }, [youtubeUrl, onActiveChange]);
+
+  const handlePlayDefaultPlaylist = useCallback(() => {
+    setError(null);
+    setUsingDefaultPlaylist(true);
+    setCurrentTrackIndex(0);
+    setVideoId(DEFAULT_PLAYLIST[0].id);
+    setPlaylistId(null);
+    setShowInput(false);
+    onActiveChange(true);
+  }, [onActiveChange]);
+
+  const handleSkipTrack = useCallback(() => {
+    if (usingDefaultPlaylist) {
+      const nextIndex = (currentTrackIndex + 1) % DEFAULT_PLAYLIST.length;
+      setCurrentTrackIndex(nextIndex);
+      setVideoId(DEFAULT_PLAYLIST[nextIndex].id);
+    }
+  }, [usingDefaultPlaylist, currentTrackIndex]);
 
   const handleClear = useCallback(() => {
     if (playerRef.current) {
@@ -174,6 +212,8 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     setPlaylistId(null);
     setYoutubeUrl("");
     setError(null);
+    setUsingDefaultPlaylist(false);
+    setCurrentTrackIndex(0);
     onActiveChange(false);
   }, [onActiveChange]);
 
@@ -212,6 +252,15 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
+          {usingDefaultPlaylist && (
+            <button
+              onClick={handleSkipTrack}
+              className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+              aria-label="Skip to next track"
+            >
+              <SkipForward className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={handleClear}
             className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
@@ -219,6 +268,11 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           >
             <RotateCcw className="w-4 h-4" />
           </button>
+          {usingDefaultPlaylist && (
+            <span className="text-white/50 text-xs ml-1">
+              {currentTrackIndex + 1}/{DEFAULT_PLAYLIST.length}
+            </span>
+          )}
         </div>
       ) : (
         <button
@@ -267,6 +321,16 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           {error && (
             <p className="text-red-400 text-xs mt-2">{error}</p>
           )}
+          
+          {/* Default playlist button */}
+          <button
+            onClick={handlePlayDefaultPlaylist}
+            className="w-full mt-3 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2"
+          >
+            <ListMusic className="w-4 h-4" />
+            Play Lofi Playlist
+          </button>
+          
           <p className="text-white/40 text-xs mt-2">
             Works with videos & playlists
           </p>
