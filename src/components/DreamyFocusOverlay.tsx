@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
 import { X, Volume2, VolumeX, Image } from "lucide-react";
@@ -20,12 +20,35 @@ const BACKGROUNDS = [
   { id: "aurora", name: "Aurora Night", src: auroraNight },
 ];
 
+// Pre-generate stable random values for particles
+const generateDustParticles = () =>
+  [...Array(60)].map(() => ({
+    width: 1 + Math.random() * 3,
+    height: 1 + Math.random() * 3,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    animationDelay: Math.random() * 8,
+    animationDuration: 6 + Math.random() * 8,
+  }));
+
+const generateStars = () =>
+  [...Array(30)].map(() => ({
+    left: Math.random() * 100,
+    top: Math.random() * 50,
+    animationDelay: Math.random() * 4,
+    animationDuration: 2 + Math.random() * 3,
+  }));
+
 export function DreamyFocusOverlay() {
   const { isFocusMode, focusedTask, setFocusedTask } = useFocusMode();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0]);
   const [showBgPicker, setShowBgPicker] = useState(false);
+
+  // Memoize particles so they don't regenerate on every render
+  const dustParticles = useMemo(() => generateDustParticles(), []);
+  const stars = useMemo(() => generateStars(), []);
 
   const exitFocusMode = useCallback(() => {
     setFocusedTask(null);
@@ -109,17 +132,17 @@ export function DreamyFocusOverlay() {
         
         {/* Floating dust particles */}
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(60)].map((_, i) => (
+          {dustParticles.map((particle, i) => (
             <div
               key={`dust-${i}`}
               className="absolute rounded-full bg-white/40 animate-float-dust"
               style={{
-                width: `${1 + Math.random() * 3}px`,
-                height: `${1 + Math.random() * 3}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${6 + Math.random() * 8}s`,
+                width: `${particle.width}px`,
+                height: `${particle.height}px`,
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
+                animationDelay: `${particle.animationDelay}s`,
+                animationDuration: `${particle.animationDuration}s`,
               }}
             />
           ))}
@@ -127,15 +150,15 @@ export function DreamyFocusOverlay() {
 
         {/* Twinkling stars */}
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(30)].map((_, i) => (
+          {stars.map((star, i) => (
             <div
               key={`star-${i}`}
               className="absolute w-1 h-1 bg-white/50 rounded-full animate-twinkle"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 50}%`,
-                animationDelay: `${Math.random() * 4}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
+                left: `${star.left}%`,
+                top: `${star.top}%`,
+                animationDelay: `${star.animationDelay}s`,
+                animationDuration: `${star.animationDuration}s`,
               }}
             />
           ))}
