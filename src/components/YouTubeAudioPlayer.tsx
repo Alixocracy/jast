@@ -45,8 +45,11 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   const [error, setError] = useState<string | null>(null);
   const [usingDefaultPlaylist, setUsingDefaultPlaylist] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const playerRef = useRef<YT.Player | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -110,6 +113,8 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
             }
             event.target.playVideo();
             setIsPlaying(true);
+            // Start tracking progress
+            startProgressTracking();
           },
           onStateChange: (event) => {
             // Handle video end - loop or go to next in default playlist
@@ -139,6 +144,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
         playerRef.current.destroy();
         playerRef.current = null;
       }
+      stopProgressTracking();
     };
   }, [videoId, playlistId]);
 
@@ -165,8 +171,43 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       setVideoId(null);
       setPlaylistId(null);
       setYoutubeUrl("");
+      stopProgressTracking();
     }
   }, [isActive]);
+
+  // Progress tracking functions
+  const startProgressTracking = useCallback(() => {
+    stopProgressTracking();
+    progressIntervalRef.current = setInterval(() => {
+      if (playerRef.current) {
+        try {
+          const currentTime = (playerRef.current as any).getCurrentTime?.() || 0;
+          const totalDuration = (playerRef.current as any).getDuration?.() || 0;
+          setProgress(currentTime);
+          setDuration(totalDuration);
+        } catch (e) {
+          // Player not ready
+        }
+      }
+    }, 500);
+  }, []);
+
+  const stopProgressTracking = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  }, []);
+
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!playerRef.current || duration === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = clickX / rect.width;
+    const seekTime = percentage * duration;
+    playerRef.current.seekTo(seekTime, true);
+    setProgress(seekTime);
+  }, [duration]);
 
   const handleSubmit = useCallback(() => {
     setError(null);
@@ -252,6 +293,21 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
+          
+          {/* Progress bar */}
+          <div 
+            onClick={handleSeek}
+            className="w-16 h-1.5 bg-white/20 rounded-full cursor-pointer hover:h-2 transition-all group"
+            title="Seek"
+          >
+            <div 
+              className="h-full bg-red-400/80 rounded-full relative"
+              style={{ width: duration > 0 ? `${(progress / duration) * 100}%` : '0%' }}
+            >
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+
           {usingDefaultPlaylist && (
             <button
               onClick={handleSkipTrack}
@@ -367,6 +423,8 @@ declare global {
       unMute(): void;
       setVolume(volume: number): void;
       getVolume(): number;
+      getCurrentTime(): number;
+      getDuration(): number;
       destroy(): void;
     }
 
