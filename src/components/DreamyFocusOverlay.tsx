@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
 import { YouTubeAudioPlayer } from "./YouTubeAudioPlayer";
-import { X, Volume2, VolumeX, Image, Music } from "lucide-react";
+import { X, Volume2, VolumeX, Image, Music, ChevronDown, Check } from "lucide-react";
 
 // Import background images
 import mistyForest from "@/assets/backgrounds/misty-forest.png";
@@ -40,6 +40,15 @@ const generateStars = () =>
     animationDuration: 2 + Math.random() * 3,
   }));
 
+interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+  color: string;
+}
+
+const STORAGE_KEY = "focusflow-tasks";
+
 export function DreamyFocusOverlay() {
   const { isFocusMode, focusedTask, setFocusedTask } = useFocusMode();
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -47,10 +56,28 @@ export function DreamyFocusOverlay() {
   const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0]);
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [isYouTubeActive, setIsYouTubeActive] = useState(false);
+  const [showTaskPicker, setShowTaskPicker] = useState(false);
+  const [undoneTasks, setUndoneTasks] = useState<Task[]>([]);
 
   // Memoize particles so they don't regenerate on every render
   const dustParticles = useMemo(() => generateDustParticles(), []);
   const stars = useMemo(() => generateStars(), []);
+
+  // Load undone tasks from localStorage
+  useEffect(() => {
+    if (isFocusMode) {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const tasks: Task[] = JSON.parse(stored);
+          const undone = tasks.filter(t => !t.completed);
+          setUndoneTasks(undone);
+        }
+      } catch (e) {
+        console.error("Failed to load tasks", e);
+      }
+    }
+  }, [isFocusMode]);
 
   const exitFocusMode = useCallback(() => {
     setFocusedTask(null);
@@ -295,27 +322,75 @@ export function DreamyFocusOverlay() {
       {/* Task Card - Lower portion */}
       <div className="relative z-10 flex-1 flex items-end justify-center pb-[20%]">
         <div className="px-4 flex flex-col items-center">
-          <div 
-            className="p-6 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in"
-            style={{
-              backgroundColor: `${focusedTask.color}15`,
-              boxShadow: `0 0 40px ${focusedTask.color}20`,
-              minWidth: '400px',
-            }}
-          >
-            <div className="flex items-center gap-3">
+          <div className="relative">
+            {/* Main task card - clickable to show task picker */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowTaskPicker(!showTaskPicker);
+              }}
+              className="p-6 rounded-2xl backdrop-blur-sm border border-white/15 animate-scale-in cursor-pointer hover:bg-white/5 transition-all group text-left"
+              style={{
+                backgroundColor: `${focusedTask.color}15`,
+                boxShadow: `0 0 40px ${focusedTask.color}20`,
+                minWidth: '400px',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-4 h-4 rounded-full animate-pulse"
+                  style={{ backgroundColor: focusedTask.color }}
+                />
+                <span className="font-medium text-white text-xl flex-1">
+                  {focusedTask.text}
+                </span>
+                <ChevronDown className={`w-5 h-5 text-white/50 transition-transform ${showTaskPicker ? 'rotate-180' : ''}`} />
+              </div>
+              <p className="text-white/50 text-sm mt-3">
+                Breathe. Focus. You've got this. ✨
+              </p>
+            </button>
+
+            {/* Task picker dropdown */}
+            {showTaskPicker && undoneTasks.length > 1 && (
               <div 
-                className="w-4 h-4 rounded-full animate-pulse"
-                style={{ backgroundColor: focusedTask.color }}
-              />
-              <span className="font-medium text-white text-xl">
-                {focusedTask.text}
-              </span>
-            </div>
-            <p className="text-white/50 text-sm mt-3">
-              Breathe. Focus. You've got this. ✨
-            </p>
+                className="absolute bottom-full mb-2 left-0 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in max-h-[300px] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <p className="text-white/40 text-xs px-2 py-1 mb-1">Switch to another task</p>
+                {undoneTasks.map((task) => (
+                  <button
+                    key={task.id}
+                    onClick={() => {
+                      setFocusedTask({
+                        id: task.id,
+                        text: task.text,
+                        color: task.color,
+                      });
+                      setShowTaskPicker(false);
+                    }}
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      focusedTask.id === task.id 
+                        ? 'bg-white/20' 
+                        : 'hover:bg-white/10'
+                    }`}
+                  >
+                    <div 
+                      className="w-3 h-3 rounded-full shrink-0"
+                      style={{ backgroundColor: task.color }}
+                    />
+                    <span className="text-white text-sm text-left flex-1 truncate">
+                      {task.text}
+                    </span>
+                    {focusedTask.id === task.id && (
+                      <Check className="w-4 h-4 text-white/70 shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
           {/* Exit hint */}
           <p className="text-white/30 text-xs text-center mt-4">
             Press ESC to exit focus mode
