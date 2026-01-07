@@ -3,6 +3,7 @@ import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
 import { YouTubeAudioPlayer } from "./YouTubeAudioPlayer";
 import { X, Volume2, VolumeX, Image, Music, ChevronDown, Check } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Import background images
 import mistyForest from "@/assets/backgrounds/misty-forest.png";
@@ -245,43 +246,65 @@ export function DreamyFocusOverlay() {
           {/* Additional controls */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              {/* Audio toggle */}
-              <button
-                onClick={() => {
-                  setIsMuted(!isMuted);
-                  if (isMuted && !isYouTubeActive && audioRef.current?.paused) {
-                    audioRef.current.play().catch(() => {});
-                  }
-                }}
-                className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-                aria-label={isMuted ? "Unmute music" : "Mute music"}
-              >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </button>
+              <TooltipProvider delayDuration={200}>
+                {/* Audio toggle */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => {
+                        setIsMuted(!isMuted);
+                        if (isMuted && !isYouTubeActive && audioRef.current?.paused) {
+                          audioRef.current.play().catch(() => {});
+                        }
+                      }}
+                      className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                      aria-label={isMuted ? "Unmute music" : "Mute music"}
+                    >
+                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+                    {isMuted ? "Unmute" : "Mute"}
+                  </TooltipContent>
+                </Tooltip>
 
-              {/* Local audio indicator (when not using YouTube) */}
-              {!isYouTubeActive && (
-                <div className="p-2 rounded-lg bg-white/10 text-white/50" title="Playing local audio">
-                  <Music className="w-4 h-4" />
-                </div>
-              )}
+                {/* Local audio indicator (when not using YouTube) */}
+                {!isYouTubeActive && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="p-2 rounded-lg bg-white/10 text-white/50">
+                        <Music className="w-4 h-4" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+                      Playing local audio
+                    </TooltipContent>
+                  </Tooltip>
+                )}
 
-              {/* YouTube audio player */}
-              <YouTubeAudioPlayer
-                isActive={isYouTubeActive}
-                isMuted={isMuted}
-                onActiveChange={setIsYouTubeActive}
-              />
+                {/* YouTube audio player */}
+                <YouTubeAudioPlayer
+                  isActive={isYouTubeActive}
+                  isMuted={isMuted}
+                  onActiveChange={setIsYouTubeActive}
+                />
 
-              {/* Background picker */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowBgPicker(!showBgPicker)}
-                  className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-                  aria-label="Change background"
-                >
-                  <Image className="w-4 h-4" />
-                </button>
+                {/* Background picker */}
+                <div className="relative">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setShowBgPicker(!showBgPicker)}
+                        className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                        aria-label="Change background"
+                      >
+                        <Image className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+                      Change background
+                    </TooltipContent>
+                  </Tooltip>
 
                 {/* Background picker dropdown */}
                 {showBgPicker && (
@@ -314,6 +337,7 @@ export function DreamyFocusOverlay() {
                   </div>
                 )}
               </div>
+              </TooltipProvider>
             </div>
           </div>
         </div>
