@@ -12,6 +12,8 @@ import oceanSunset from "@/assets/backgrounds/ocean-sunset.png";
 import mountainLake from "@/assets/backgrounds/mountain-lake.png";
 import zenGarden from "@/assets/backgrounds/zen-garden.png";
 import auroraNight from "@/assets/backgrounds/aurora-night.png";
+import cherryBlossom from "@/assets/backgrounds/cherry-blossom.png";
+import lavenderFields from "@/assets/backgrounds/lavender-fields.png";
 
 const BACKGROUNDS = [
   { id: "forest", name: "Misty Forest", src: mistyForest },
@@ -20,6 +22,8 @@ const BACKGROUNDS = [
   { id: "lake", name: "Mountain Lake", src: mountainLake },
   { id: "zen", name: "Zen Garden", src: zenGarden },
   { id: "aurora", name: "Aurora Night", src: auroraNight },
+  { id: "cherry", name: "Cherry Blossom", src: cherryBlossom },
+  { id: "lavender", name: "Lavender Fields", src: lavenderFields },
 ];
 
 // Pre-generate stable random values for particles
