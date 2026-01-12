@@ -5,9 +5,10 @@ import { useFocusMode } from "@/contexts/FocusModeContext";
 
 interface FocusTimerProps {
   defaultMinutes?: number;
+  compact?: boolean;
 }
 
-export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
+export function FocusTimer({ defaultMinutes = 25, compact = false }: FocusTimerProps) {
   const { isFocusMode, initialTimerSeconds, setInitialTimerSeconds, isTimerRunning, setIsTimerRunning } = useFocusMode();
   
   // Initialize from context values so timer persists across focus mode transitions
@@ -179,6 +180,102 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
 
   const progress = ((selectedDuration * 60 - timeLeft) / (selectedDuration * 60)) * 100;
 
+  // Compact SVG dimensions for focus mode (Safari-compatible - no CSS geometry props)
+  const svgSize = compact ? 72 : 160;
+  const circleCenter = compact ? 36 : 80;
+  const circleRadius = compact ? 30 : 70;
+  const strokeWidth = compact ? 5 : 8;
+  const circumference = 2 * Math.PI * circleRadius;
+
+  // Compact mode for focus overlay
+  if (compact) {
+    return (
+      <div className="flex items-center gap-4">
+        {/* Timer circle */}
+        <div className="relative flex items-center justify-center">
+          <svg 
+            width={svgSize} 
+            height={svgSize} 
+            className="transform -rotate-90"
+            style={{ width: svgSize, height: svgSize }}
+          >
+            <circle
+              cx={circleCenter}
+              cy={circleCenter}
+              r={circleRadius}
+              stroke="rgba(255, 255, 255, 0.2)"
+              strokeWidth={strokeWidth}
+              fill="none"
+            />
+            <circle
+              cx={circleCenter}
+              cy={circleCenter}
+              r={circleRadius}
+              stroke="rgba(255, 255, 255, 0.9)"
+              strokeWidth={strokeWidth}
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference - (circumference * progress) / 100}
+              strokeLinecap="round"
+              className="transition-all duration-1000"
+            />
+          </svg>
+          {isEditing ? (
+            <input
+              type="text"
+              inputMode="numeric"
+              value={customTime}
+              autoFocus
+              onChange={(e) => setCustomTime(e.target.value)}
+              onBlur={commitCustomMinutes}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitCustomMinutes();
+                if (e.key === "Escape") setIsEditing(false);
+              }}
+              className="absolute text-center text-sm font-medium text-white bg-black/50 border border-white/30 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-white/60"
+              style={{ width: "60px" }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={startEditing}
+              className="absolute text-base font-medium text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-white/60 rounded px-1"
+              aria-label="Set custom timer minutes"
+            >
+              {formatTime(timeLeft)}
+            </button>
+          )}
+        </div>
+
+        {/* Duration buttons */}
+        <div className="flex gap-1.5">
+          {durations.map((duration) => (
+            <button
+              key={duration}
+              onClick={() => selectDuration(duration)}
+              className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
+                selectedDuration === duration
+                  ? "bg-white/30 text-white"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+            >
+              {duration}m
+            </button>
+          ))}
+        </div>
+
+        {/* Play/Pause button */}
+        <button
+          onClick={toggleTimer}
+          className="p-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all"
+          aria-label={isRunning ? "Pause timer" : "Start timer"}
+        >
+          {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-card rounded-2xl p-6 shadow-card animate-fade-in animate-delay-100">
       <h2 className="text-lg font-semibold text-foreground mb-4">Focus Timer</h2>
@@ -202,25 +299,30 @@ export function FocusTimer({ defaultMinutes = 25 }: FocusTimerProps) {
 
       {/* Timer display */}
       <div className="relative flex items-center justify-center mb-6">
-        <svg className="w-40 h-40 transform -rotate-90">
+        <svg 
+          width={svgSize} 
+          height={svgSize} 
+          className="transform -rotate-90"
+          style={{ width: svgSize, height: svgSize }}
+        >
           <circle
-            cx="80"
-            cy="80"
-            r="70"
+            cx={circleCenter}
+            cy={circleCenter}
+            r={circleRadius}
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth={strokeWidth}
             fill="none"
             className="text-muted"
           />
           <circle
-            cx="80"
-            cy="80"
-            r="70"
+            cx={circleCenter}
+            cy={circleCenter}
+            r={circleRadius}
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth={strokeWidth}
             fill="none"
-            strokeDasharray={440}
-            strokeDashoffset={440 - (440 * progress) / 100}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - (circumference * progress) / 100}
             strokeLinecap="round"
             className="text-primary transition-all duration-1000"
           />
