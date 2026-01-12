@@ -235,10 +235,8 @@ export function DreamyFocusOverlay() {
           className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Timer with layout based on sketch: display on left, controls on right */}
-          <div className="dreamy-timer-panel">
-            <FocusTimer />
-          </div>
+          {/* Timer - compact mode for Safari compatibility */}
+          <FocusTimer compact />
 
           {/* Divider */}
           <div className="w-px h-16 bg-white/20" />
