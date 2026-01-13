@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "JAST.png", "JAST-color.png", "JAST-here.png", "audio/*"],
+      includeAssets: ["favicon.ico", "app-icon.png", "audio/*"],
       manifest: {
         name: "JAST - Your Personal Wellbeing Assistant",
         short_name: "JAST",
@@ -27,13 +27,7 @@ export default defineConfig(({ mode }) => ({
         start_url: "/",
         icons: [
           {
-            src: "/JAST.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any"
-          },
-          {
-            src: "/JAST-color.png",
+            src: "/app-icon.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable"
@@ -41,6 +35,7 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,mp3,wav,woff,woff2}"],
         runtimeCaching: [
           {
