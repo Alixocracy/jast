@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Youtube, Link, X, Play, Pause, RotateCcw, ListMusic, SkipForward, Trash2 } from "lucide-react";
+import { Youtube, Link, X, Play, Pause, ListMusic, SkipForward, Trash2, Music } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface YouTubeAudioPlayerProps {
@@ -13,13 +13,24 @@ interface SavedTrack {
   url: string;
   title: string;
   isPlaylist: boolean;
+  isLocal?: boolean;
 }
 
 const SAVED_PLAYLIST_KEY = "jast-youtube-saved-playlist";
 const PLAYLIST_INITIALIZED_KEY = "jast-youtube-playlist-initialized";
 
+// Local audio track (always first, non-removable)
+const LOCAL_AUDIO_TRACK: SavedTrack = {
+  id: "local-dreamer",
+  url: "/audio/dreamer.mp3",
+  title: "Dreamer (Local)",
+  isPlaylist: false,
+  isLocal: true,
+};
+
 // Default lofi tracks to seed the playlist
 const DEFAULT_LOFI_TRACKS: SavedTrack[] = [
+  LOCAL_AUDIO_TRACK,
   { id: "cKxRFlXYquo", url: "https://www.youtube.com/watch?v=cKxRFlXYquo", title: "Lofi Hip Hop Radio", isPlaylist: false },
   { id: "RG2IK8oRZNA", url: "https://www.youtube.com/watch?v=RG2IK8oRZNA", title: "Chill Lofi Beats", isPlaylist: false },
   { id: "k2w_tU8Cy9c", url: "https://www.youtube.com/watch?v=k2w_tU8Cy9c", title: "Study Music Mix", isPlaylist: false },
@@ -96,7 +107,14 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       const initialized = localStorage.getItem(PLAYLIST_INITIALIZED_KEY);
       
       if (saved) {
-        setSavedPlaylist(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Ensure local track is always first
+        const hasLocal = parsed.some((t: SavedTrack) => t.isLocal);
+        if (!hasLocal) {
+          setSavedPlaylist([LOCAL_AUDIO_TRACK, ...parsed]);
+        } else {
+          setSavedPlaylist(parsed);
+        }
       } else if (!initialized) {
         // First time: seed with default lofi tracks
         setSavedPlaylist(DEFAULT_LOFI_TRACKS);
@@ -143,8 +161,9 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     savePlaylists([...savedPlaylist, newTrack]);
   }, [savedPlaylist, savePlaylists]);
 
-  // Remove track from saved playlist
+  // Remove track from saved playlist (except local track)
   const removeFromSavedPlaylist = useCallback((id: string) => {
+    if (id === LOCAL_AUDIO_TRACK.id) return; // Cannot remove local track
     savePlaylists(savedPlaylist.filter(t => t.id !== id));
   }, [savedPlaylist, savePlaylists]);
 
@@ -153,6 +172,21 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     setError(null);
     setIsPlayingFromList(true);
     setCurrentTrackIndex(index ?? savedPlaylist.findIndex(t => t.id === track.id));
+    
+    // Handle local audio track
+    if (track.isLocal) {
+      // Stop YouTube if playing
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+      setVideoId(null);
+      setPlaylistId(null);
+      setShowInput(false);
+      onActiveChange(false); // This will trigger local audio in DreamyFocusOverlay
+      return;
+    }
+    
     if (track.isPlaylist) {
       setPlaylistId(track.id);
       setVideoId(null);
@@ -242,8 +276,21 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
               if (isPlayingFromList && savedPlaylist.length > 0) {
                 // Go to next track in saved playlist
                 const nextIndex = (currentTrackIndex + 1) % savedPlaylist.length;
+                const nextTrack = savedPlaylist[nextIndex];
                 setCurrentTrackIndex(nextIndex);
-                setVideoId(savedPlaylist[nextIndex].id);
+                
+                // Handle if next track is local
+                if (nextTrack.isLocal) {
+                  if (playerRef.current) {
+                    playerRef.current.destroy();
+                    playerRef.current = null;
+                  }
+                  setVideoId(null);
+                  setPlaylistId(null);
+                  onActiveChange(false);
+                } else {
+                  setVideoId(nextTrack.id);
+                }
               } else if (videoId && !playlistId) {
                 // Loop single video
                 event.target.seekTo(0, true);
@@ -351,10 +398,24 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   }, [youtubeUrl, onActiveChange, addToSavedPlaylist]);
 
   const handleSkipTrack = useCallback(() => {
-    if (isPlayingFromList && savedPlaylist.length > 0) {
+    if (savedPlaylist.length > 1) {
       const nextIndex = (currentTrackIndex + 1) % savedPlaylist.length;
-      setCurrentTrackIndex(nextIndex);
       const nextTrack = savedPlaylist[nextIndex];
+      setCurrentTrackIndex(nextIndex);
+      setIsPlayingFromList(true);
+      
+      // Handle local track
+      if (nextTrack.isLocal) {
+        if (playerRef.current) {
+          playerRef.current.destroy();
+          playerRef.current = null;
+        }
+        setVideoId(null);
+        setPlaylistId(null);
+        onActiveChange(false);
+        return;
+      }
+      
       if (nextTrack.isPlaylist) {
         setPlaylistId(nextTrack.id);
         setVideoId(null);
@@ -362,22 +423,9 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
         setVideoId(nextTrack.id);
         setPlaylistId(null);
       }
+      onActiveChange(true);
     }
-  }, [isPlayingFromList, currentTrackIndex, savedPlaylist]);
-
-  const handleClear = useCallback(() => {
-    if (playerRef.current) {
-      playerRef.current.destroy();
-      playerRef.current = null;
-    }
-    setVideoId(null);
-    setPlaylistId(null);
-    setYoutubeUrl("");
-    setError(null);
-    setIsPlayingFromList(false);
-    setCurrentTrackIndex(0);
-    onActiveChange(false);
-  }, [onActiveChange]);
+  }, [currentTrackIndex, savedPlaylist, onActiveChange]);
 
   const togglePlayPause = useCallback(() => {
     if (playerRef.current) {
@@ -444,7 +492,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                 </TooltipContent>
               </Tooltip>
 
-              {isPlayingFromList && savedPlaylist.length > 1 && (
+              {savedPlaylist.length > 1 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -460,21 +508,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                   </TooltipContent>
                 </Tooltip>
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleClear}
-                    className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-                    aria-label="Stop YouTube and use local audio"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-                  Switch to local audio
-                </TooltipContent>
-              </Tooltip>
-              {isPlayingFromList && savedPlaylist.length > 0 && (
+              {savedPlaylist.length > 0 && (
                 <span className="text-white/50 text-xs ml-1">
                   {currentTrackIndex + 1}/{savedPlaylist.length}
                 </span>
@@ -556,7 +590,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                   <div
                     key={track.id}
                     className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all group ${
-                      isPlayingFromList && currentTrackIndex === index 
+                      currentTrackIndex === index 
                         ? "bg-red-500/20 text-red-400" 
                         : "bg-white/5 hover:bg-white/10"
                     }`}
@@ -565,19 +599,23 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                       onClick={() => playSavedTrack(track, index)}
                       className="flex-1 text-left text-sm hover:text-white truncate pr-2"
                     >
-                      <span className="mr-2">{track.isPlaylist ? "📋" : "🎵"}</span>
+                      <span className="mr-2">
+                        {track.isLocal ? "🎧" : track.isPlaylist ? "📋" : "🎵"}
+                      </span>
                       {track.title}
                     </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFromSavedPlaylist(track.id);
-                      }}
-                      className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                      aria-label="Remove from playlist"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    {!track.isLocal && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFromSavedPlaylist(track.id);
+                        }}
+                        className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                        aria-label="Remove from playlist"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </>

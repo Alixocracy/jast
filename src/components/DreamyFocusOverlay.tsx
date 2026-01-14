@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
 import { YouTubeAudioPlayer } from "./YouTubeAudioPlayer";
-import { X, Volume2, VolumeX, Image, Music, ChevronDown, Check } from "lucide-react";
+import { X, Volume2, VolumeX, Image, ChevronDown, Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Import background images
@@ -270,19 +270,6 @@ export function DreamyFocusOverlay() {
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Local audio indicator (when not using YouTube) */}
-                {!isYouTubeActive && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="p-2 rounded-lg bg-white/10 text-white/50">
-                        <Music className="w-4 h-4" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-                      Playing local audio
-                    </TooltipContent>
-                  </Tooltip>
-                )}
 
                 {/* YouTube audio player */}
                 <YouTubeAudioPlayer
