@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Youtube, Link, X, Play, Pause, RotateCcw, ListMusic, SkipForward, Trash2, ChevronDown } from "lucide-react";
+import { Youtube, Link, X, Play, Pause, RotateCcw, ListMusic, SkipForward, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface YouTubeAudioPlayerProps {
@@ -75,7 +75,7 @@ function generateFallbackTitle(url: string): string {
 export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTubeAudioPlayerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
-  const [showSavedList, setShowSavedList] = useState(false);
+  
   const [videoId, setVideoId] = useState<string | null>(null);
   const [playlistId, setPlaylistId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -161,7 +161,6 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       setPlaylistId(null);
     }
     setShowInput(false);
-    setShowSavedList(false);
     onActiveChange(true);
   }, [onActiveChange, savedPlaylist]);
 
@@ -501,7 +500,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-              {savedPlaylist.length > 0 ? `Your playlist (${savedPlaylist.length})` : "YouTube audio"}
+              YouTube Playlist
             </TooltipContent>
           </Tooltip>
         </div>
@@ -541,66 +540,51 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
             <p className="text-red-400 text-xs mt-2">{error}</p>
           )}
 
-          {/* Saved playlist section */}
-          <div className="mt-3">
-            <button
-              onClick={() => setShowSavedList(!showSavedList)}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-all flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2">
-                <ListMusic className="w-4 h-4" />
-                <span>Your Playlist ({savedPlaylist.length})</span>
-              </div>
-              <ChevronDown className={`w-4 h-4 transition-transform ${showSavedList ? "rotate-180" : ""}`} />
-            </button>
-            
-            {showSavedList && (
-              <div className="mt-2 max-h-48 overflow-y-auto space-y-1 scrollbar-thin">
-                {savedPlaylist.length > 0 ? (
-                  <>
-                    {/* Play all button */}
+          {/* Playlist section - always visible */}
+          <div className="mt-3 max-h-48 overflow-y-auto space-y-1 scrollbar-thin">
+            {savedPlaylist.length > 0 ? (
+              <>
+                {/* Play all button */}
+                <button
+                  onClick={playAllFromList}
+                  className="w-full px-3 py-2 mb-2 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition-all flex items-center justify-center gap-2"
+                >
+                  <Play className="w-3 h-3" />
+                  Play All
+                </button>
+                {savedPlaylist.map((track, index) => (
+                  <div
+                    key={track.id}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all group ${
+                      isPlayingFromList && currentTrackIndex === index 
+                        ? "bg-red-500/20 text-red-400" 
+                        : "bg-white/5 hover:bg-white/10"
+                    }`}
+                  >
                     <button
-                      onClick={playAllFromList}
-                      className="w-full px-3 py-2 mb-2 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition-all flex items-center justify-center gap-2"
+                      onClick={() => playSavedTrack(track, index)}
+                      className="flex-1 text-left text-sm hover:text-white truncate pr-2"
                     >
-                      <Play className="w-3 h-3" />
-                      Play All
+                      <span className="mr-2">{track.isPlaylist ? "📋" : "🎵"}</span>
+                      {track.title}
                     </button>
-                    {savedPlaylist.map((track, index) => (
-                      <div
-                        key={track.id}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all group ${
-                          isPlayingFromList && currentTrackIndex === index 
-                            ? "bg-red-500/20 text-red-400" 
-                            : "bg-white/5 hover:bg-white/10"
-                        }`}
-                      >
-                        <button
-                          onClick={() => playSavedTrack(track, index)}
-                          className="flex-1 text-left text-sm hover:text-white truncate pr-2"
-                        >
-                          <span className="mr-2">{track.isPlaylist ? "📋" : "🎵"}</span>
-                          {track.title}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeFromSavedPlaylist(track.id);
-                          }}
-                          className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                          aria-label="Remove from playlist"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <p className="text-white/40 text-xs text-center py-2">
-                    No tracks yet. Add YouTube links above!
-                  </p>
-                )}
-              </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromSavedPlaylist(track.id);
+                      }}
+                      className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                      aria-label="Remove from playlist"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <p className="text-white/40 text-xs text-center py-2">
+                No tracks yet. Add YouTube links above!
+              </p>
             )}
           </div>
           
