@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Youtube, Link, X, Play, Pause, RotateCcw, ListMusic, SkipForward } from "lucide-react";
+import { Youtube, Link, X, Play, Pause, RotateCcw, ListMusic, SkipForward, Trash2, ChevronDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface YouTubeAudioPlayerProps {
@@ -7,6 +7,15 @@ interface YouTubeAudioPlayerProps {
   isMuted: boolean;
   onActiveChange: (active: boolean) => void;
 }
+
+interface SavedTrack {
+  id: string;
+  url: string;
+  title: string;
+  isPlaylist: boolean;
+}
+
+const SAVED_PLAYLIST_KEY = "jast-youtube-saved-playlist";
 
 // Default playlist of sample YouTube videos
 const DEFAULT_PLAYLIST = [
@@ -37,9 +46,19 @@ function extractPlaylistId(url: string): string | null {
   return match ? match[1] : null;
 }
 
+// Generate a short title from URL
+function generateTitle(url: string): string {
+  const vid = extractVideoId(url);
+  const pid = extractPlaylistId(url);
+  if (pid) return `Playlist ${pid.slice(0, 6)}...`;
+  if (vid) return `Video ${vid.slice(0, 6)}...`;
+  return "Unknown";
+}
+
 export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTubeAudioPlayerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
+  const [showSavedList, setShowSavedList] = useState(false);
   const [videoId, setVideoId] = useState<string | null>(null);
   const [playlistId, setPlaylistId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -48,9 +67,72 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [savedPlaylist, setSavedPlaylist] = useState<SavedTrack[]>([]);
   const playerRef = useRef<YT.Player | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load saved playlist from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SAVED_PLAYLIST_KEY);
+      if (saved) {
+        setSavedPlaylist(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error("Failed to load saved playlist:", e);
+    }
+  }, []);
+
+  // Save playlist to localStorage
+  const savePlaylists = useCallback((tracks: SavedTrack[]) => {
+    setSavedPlaylist(tracks);
+    try {
+      localStorage.setItem(SAVED_PLAYLIST_KEY, JSON.stringify(tracks));
+    } catch (e) {
+      console.error("Failed to save playlist:", e);
+    }
+  }, []);
+
+  // Add track to saved playlist
+  const addToSavedPlaylist = useCallback((url: string) => {
+    const vid = extractVideoId(url);
+    const pid = extractPlaylistId(url);
+    if (!vid && !pid) return;
+    
+    const id = pid || vid || "";
+    // Check if already exists
+    if (savedPlaylist.some(t => t.id === id)) return;
+    
+    const newTrack: SavedTrack = {
+      id,
+      url,
+      title: generateTitle(url),
+      isPlaylist: !!pid,
+    };
+    savePlaylists([...savedPlaylist, newTrack]);
+  }, [savedPlaylist, savePlaylists]);
+
+  // Remove track from saved playlist
+  const removeFromSavedPlaylist = useCallback((id: string) => {
+    savePlaylists(savedPlaylist.filter(t => t.id !== id));
+  }, [savedPlaylist, savePlaylists]);
+
+  // Play a saved track
+  const playSavedTrack = useCallback((track: SavedTrack) => {
+    setError(null);
+    setUsingDefaultPlaylist(false);
+    if (track.isPlaylist) {
+      setPlaylistId(track.id);
+      setVideoId(null);
+    } else {
+      setVideoId(track.id);
+      setPlaylistId(null);
+    }
+    setShowInput(false);
+    setShowSavedList(false);
+    onActiveChange(true);
+  }, [onActiveChange]);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -220,12 +302,16 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       return;
     }
 
+    // Add to saved playlist
+    addToSavedPlaylist(youtubeUrl);
+
     setUsingDefaultPlaylist(false);
     setVideoId(vid);
     setPlaylistId(pid);
     setShowInput(false);
+    setYoutubeUrl("");
     onActiveChange(true);
-  }, [youtubeUrl, onActiveChange]);
+  }, [youtubeUrl, onActiveChange, addToSavedPlaylist]);
 
   const handlePlayDefaultPlaylist = useCallback(() => {
     setError(null);
@@ -386,7 +472,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       {/* URL input dropdown */}
       {showInput && (
         <div 
-          className="absolute top-full mt-2 right-0 p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in z-[100] w-72"
+          className="absolute top-full mt-2 right-0 p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in z-[100] w-80"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-2 mb-2">
@@ -415,6 +501,51 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           </div>
           {error && (
             <p className="text-red-400 text-xs mt-2">{error}</p>
+          )}
+
+          {/* Saved playlist section */}
+          {savedPlaylist.length > 0 && (
+            <div className="mt-3">
+              <button
+                onClick={() => setShowSavedList(!showSavedList)}
+                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <ListMusic className="w-4 h-4" />
+                  <span>Your Saved ({savedPlaylist.length})</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSavedList ? "rotate-180" : ""}`} />
+              </button>
+              
+              {showSavedList && (
+                <div className="mt-2 max-h-40 overflow-y-auto space-y-1 scrollbar-thin">
+                  {savedPlaylist.map((track) => (
+                    <div
+                      key={track.id}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all group"
+                    >
+                      <button
+                        onClick={() => playSavedTrack(track)}
+                        className="flex-1 text-left text-white/70 text-sm hover:text-white truncate pr-2"
+                      >
+                        <span className="mr-2">{track.isPlaylist ? "📋" : "🎵"}</span>
+                        {track.title}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFromSavedPlaylist(track.id);
+                        }}
+                        className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                        aria-label="Remove from playlist"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
           
           {/* Default playlist button */}
