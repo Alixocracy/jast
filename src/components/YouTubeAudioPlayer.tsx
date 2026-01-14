@@ -46,8 +46,24 @@ function extractPlaylistId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-// Generate a short title from URL
-function generateTitle(url: string): string {
+// Fetch video title from YouTube oEmbed API
+async function fetchVideoTitle(videoId: string): Promise<string> {
+  try {
+    const response = await fetch(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      return data.title || `Video ${videoId.slice(0, 6)}...`;
+    }
+  } catch (e) {
+    console.error("Failed to fetch video title:", e);
+  }
+  return `Video ${videoId.slice(0, 6)}...`;
+}
+
+// Generate a fallback title from URL
+function generateFallbackTitle(url: string): string {
   const vid = extractVideoId(url);
   const pid = extractPlaylistId(url);
   if (pid) return `Playlist ${pid.slice(0, 6)}...`;
@@ -95,7 +111,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   }, []);
 
   // Add track to saved playlist
-  const addToSavedPlaylist = useCallback((url: string) => {
+  const addToSavedPlaylist = useCallback(async (url: string) => {
     const vid = extractVideoId(url);
     const pid = extractPlaylistId(url);
     if (!vid && !pid) return;
@@ -104,10 +120,16 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     // Check if already exists
     if (savedPlaylist.some(t => t.id === id)) return;
     
+    // Fetch real title for videos
+    let title = generateFallbackTitle(url);
+    if (vid && !pid) {
+      title = await fetchVideoTitle(vid);
+    }
+    
     const newTrack: SavedTrack = {
       id,
       url,
-      title: generateTitle(url),
+      title,
       isPlaylist: !!pid,
     };
     savePlaylists([...savedPlaylist, newTrack]);
@@ -371,83 +393,84 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       />
 
       {/* YouTube button / controls */}
-      {isActive && (videoId || playlistId) ? (
-        <TooltipProvider delayDuration={200}>
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={togglePlayPause}
-                  className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all"
-                  aria-label={isPlaying ? "Pause YouTube" : "Play YouTube"}
-                >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-                {isPlaying ? "Pause" : "Play"}
-              </TooltipContent>
-            </Tooltip>
-            
-            {/* Progress bar */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div 
-                  onClick={handleSeek}
-                  className="w-16 h-1.5 bg-white/20 rounded-full cursor-pointer hover:h-2 transition-all group"
-                >
-                  <div 
-                    className="h-full bg-red-400/80 rounded-full relative"
-                    style={{ width: duration > 0 ? `${(progress / duration) * 100}%` : '0%' }}
-                  >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-                Seek
-              </TooltipContent>
-            </Tooltip>
-
-            {usingDefaultPlaylist && (
+      <TooltipProvider delayDuration={200}>
+        <div className="flex items-center gap-1">
+          {isActive && (videoId || playlistId) && (
+            <>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={handleSkipTrack}
-                    className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-                    aria-label="Skip to next track"
+                    onClick={togglePlayPause}
+                    className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all"
+                    aria-label={isPlaying ? "Pause YouTube" : "Play YouTube"}
                   >
-                    <SkipForward className="w-4 h-4" />
+                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-                  Next track
+                  {isPlaying ? "Pause" : "Play"}
                 </TooltipContent>
               </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleClear}
-                  className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-                  aria-label="Stop YouTube and use local audio"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-                Switch to local audio
-              </TooltipContent>
-            </Tooltip>
-            {usingDefaultPlaylist && (
-              <span className="text-white/50 text-xs ml-1">
-                {currentTrackIndex + 1}/{DEFAULT_PLAYLIST.length}
-              </span>
-            )}
-          </div>
-        </TooltipProvider>
-      ) : (
-        <TooltipProvider delayDuration={200}>
+              
+              {/* Progress bar */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div 
+                    onClick={handleSeek}
+                    className="w-16 h-1.5 bg-white/20 rounded-full cursor-pointer hover:h-2 transition-all group"
+                  >
+                    <div 
+                      className="h-full bg-red-400/80 rounded-full relative"
+                      style={{ width: duration > 0 ? `${(progress / duration) * 100}%` : '0%' }}
+                    >
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+                  Seek
+                </TooltipContent>
+              </Tooltip>
+
+              {usingDefaultPlaylist && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleSkipTrack}
+                      className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                      aria-label="Skip to next track"
+                    >
+                      <SkipForward className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+                    Next track
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleClear}
+                    className="p-2 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                    aria-label="Stop YouTube and use local audio"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+                  Switch to local audio
+                </TooltipContent>
+              </Tooltip>
+              {usingDefaultPlaylist && (
+                <span className="text-white/50 text-xs ml-1">
+                  {currentTrackIndex + 1}/{DEFAULT_PLAYLIST.length}
+                </span>
+              )}
+            </>
+          )}
+          
+          {/* Always show YouTube icon to access saved list */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -455,19 +478,21 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                 className={`p-2 rounded-lg transition-all ${
                   showInput 
                     ? "bg-red-500/30 text-red-400" 
-                    : "bg-white/10 text-white/70 hover:text-white hover:bg-white/20"
+                    : isActive && (videoId || playlistId)
+                      ? "bg-white/10 text-red-400 hover:bg-white/20"
+                      : "bg-white/10 text-white/70 hover:text-white hover:bg-white/20"
                 }`}
-                aria-label="Add YouTube audio"
+                aria-label="YouTube playlist"
               >
                 <Youtube className="w-4 h-4" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
-              YouTube audio
+              {savedPlaylist.length > 0 ? `Your playlist (${savedPlaylist.length})` : "YouTube audio"}
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      )}
+        </div>
+      </TooltipProvider>
 
       {/* URL input dropdown */}
       {showInput && (
