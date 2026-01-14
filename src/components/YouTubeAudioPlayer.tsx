@@ -16,14 +16,15 @@ interface SavedTrack {
 }
 
 const SAVED_PLAYLIST_KEY = "jast-youtube-saved-playlist";
+const PLAYLIST_INITIALIZED_KEY = "jast-youtube-playlist-initialized";
 
-// Default playlist of sample YouTube videos
-const DEFAULT_PLAYLIST = [
-  { id: "cKxRFlXYquo", title: "Lofi 1" },
-  { id: "RG2IK8oRZNA", title: "Lofi 2" },
-  { id: "k2w_tU8Cy9c", title: "Lofi 3" },
-  { id: "k9ts6p63ns0", title: "Lofi 4" },
-  { id: "sAcj8me7wGI", title: "Lofi 5" },
+// Default lofi tracks to seed the playlist
+const DEFAULT_LOFI_TRACKS: SavedTrack[] = [
+  { id: "cKxRFlXYquo", url: "https://www.youtube.com/watch?v=cKxRFlXYquo", title: "Lofi Hip Hop Radio", isPlaylist: false },
+  { id: "RG2IK8oRZNA", url: "https://www.youtube.com/watch?v=RG2IK8oRZNA", title: "Chill Lofi Beats", isPlaylist: false },
+  { id: "k2w_tU8Cy9c", url: "https://www.youtube.com/watch?v=k2w_tU8Cy9c", title: "Study Music Mix", isPlaylist: false },
+  { id: "k9ts6p63ns0", url: "https://www.youtube.com/watch?v=k9ts6p63ns0", title: "Relaxing Lofi", isPlaylist: false },
+  { id: "sAcj8me7wGI", url: "https://www.youtube.com/watch?v=sAcj8me7wGI", title: "Focus Beats", isPlaylist: false },
 ];
 
 // Extract video ID from various YouTube URL formats
@@ -79,7 +80,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   const [playlistId, setPlaylistId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usingDefaultPlaylist, setUsingDefaultPlaylist] = useState(false);
+  const [isPlayingFromList, setIsPlayingFromList] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -88,12 +89,19 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   const containerRef = useRef<HTMLDivElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load saved playlist from localStorage
+  // Load saved playlist from localStorage (seed with lofi tracks on first load)
   useEffect(() => {
     try {
       const saved = localStorage.getItem(SAVED_PLAYLIST_KEY);
+      const initialized = localStorage.getItem(PLAYLIST_INITIALIZED_KEY);
+      
       if (saved) {
         setSavedPlaylist(JSON.parse(saved));
+      } else if (!initialized) {
+        // First time: seed with default lofi tracks
+        setSavedPlaylist(DEFAULT_LOFI_TRACKS);
+        localStorage.setItem(SAVED_PLAYLIST_KEY, JSON.stringify(DEFAULT_LOFI_TRACKS));
+        localStorage.setItem(PLAYLIST_INITIALIZED_KEY, "true");
       }
     } catch (e) {
       console.error("Failed to load saved playlist:", e);
@@ -141,9 +149,10 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   }, [savedPlaylist, savePlaylists]);
 
   // Play a saved track
-  const playSavedTrack = useCallback((track: SavedTrack) => {
+  const playSavedTrack = useCallback((track: SavedTrack, index?: number) => {
     setError(null);
-    setUsingDefaultPlaylist(false);
+    setIsPlayingFromList(true);
+    setCurrentTrackIndex(index ?? savedPlaylist.findIndex(t => t.id === track.id));
     if (track.isPlaylist) {
       setPlaylistId(track.id);
       setVideoId(null);
@@ -154,7 +163,14 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     setShowInput(false);
     setShowSavedList(false);
     onActiveChange(true);
-  }, [onActiveChange]);
+  }, [onActiveChange, savedPlaylist]);
+
+  // Play all from saved playlist
+  const playAllFromList = useCallback(() => {
+    if (savedPlaylist.length > 0) {
+      playSavedTrack(savedPlaylist[0], 0);
+    }
+  }, [savedPlaylist, playSavedTrack]);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -222,13 +238,13 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
             startProgressTracking();
           },
           onStateChange: (event) => {
-            // Handle video end - loop or go to next in default playlist
+            // Handle video end - go to next in playlist if playing from list
             if (event.data === window.YT.PlayerState.ENDED) {
-              if (usingDefaultPlaylist) {
-                // Go to next track in default playlist
-                const nextIndex = (currentTrackIndex + 1) % DEFAULT_PLAYLIST.length;
+              if (isPlayingFromList && savedPlaylist.length > 0) {
+                // Go to next track in saved playlist
+                const nextIndex = (currentTrackIndex + 1) % savedPlaylist.length;
                 setCurrentTrackIndex(nextIndex);
-                setVideoId(DEFAULT_PLAYLIST[nextIndex].id);
+                setVideoId(savedPlaylist[nextIndex].id);
               } else if (videoId && !playlistId) {
                 // Loop single video
                 event.target.seekTo(0, true);
@@ -327,7 +343,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     // Add to saved playlist
     addToSavedPlaylist(youtubeUrl);
 
-    setUsingDefaultPlaylist(false);
+    setIsPlayingFromList(false);
     setVideoId(vid);
     setPlaylistId(pid);
     setShowInput(false);
@@ -335,23 +351,20 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     onActiveChange(true);
   }, [youtubeUrl, onActiveChange, addToSavedPlaylist]);
 
-  const handlePlayDefaultPlaylist = useCallback(() => {
-    setError(null);
-    setUsingDefaultPlaylist(true);
-    setCurrentTrackIndex(0);
-    setVideoId(DEFAULT_PLAYLIST[0].id);
-    setPlaylistId(null);
-    setShowInput(false);
-    onActiveChange(true);
-  }, [onActiveChange]);
-
   const handleSkipTrack = useCallback(() => {
-    if (usingDefaultPlaylist) {
-      const nextIndex = (currentTrackIndex + 1) % DEFAULT_PLAYLIST.length;
+    if (isPlayingFromList && savedPlaylist.length > 0) {
+      const nextIndex = (currentTrackIndex + 1) % savedPlaylist.length;
       setCurrentTrackIndex(nextIndex);
-      setVideoId(DEFAULT_PLAYLIST[nextIndex].id);
+      const nextTrack = savedPlaylist[nextIndex];
+      if (nextTrack.isPlaylist) {
+        setPlaylistId(nextTrack.id);
+        setVideoId(null);
+      } else {
+        setVideoId(nextTrack.id);
+        setPlaylistId(null);
+      }
     }
-  }, [usingDefaultPlaylist, currentTrackIndex]);
+  }, [isPlayingFromList, currentTrackIndex, savedPlaylist]);
 
   const handleClear = useCallback(() => {
     if (playerRef.current) {
@@ -362,7 +375,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
     setPlaylistId(null);
     setYoutubeUrl("");
     setError(null);
-    setUsingDefaultPlaylist(false);
+    setIsPlayingFromList(false);
     setCurrentTrackIndex(0);
     onActiveChange(false);
   }, [onActiveChange]);
@@ -432,7 +445,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                 </TooltipContent>
               </Tooltip>
 
-              {usingDefaultPlaylist && (
+              {isPlayingFromList && savedPlaylist.length > 1 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -462,9 +475,9 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                   Switch to local audio
                 </TooltipContent>
               </Tooltip>
-              {usingDefaultPlaylist && (
+              {isPlayingFromList && savedPlaylist.length > 0 && (
                 <span className="text-white/50 text-xs ml-1">
-                  {currentTrackIndex + 1}/{DEFAULT_PLAYLIST.length}
+                  {currentTrackIndex + 1}/{savedPlaylist.length}
                 </span>
               )}
             </>
@@ -529,58 +542,67 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           )}
 
           {/* Saved playlist section */}
-          {savedPlaylist.length > 0 && (
-            <div className="mt-3">
-              <button
-                onClick={() => setShowSavedList(!showSavedList)}
-                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-all flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <ListMusic className="w-4 h-4" />
-                  <span>Your Saved ({savedPlaylist.length})</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showSavedList ? "rotate-180" : ""}`} />
-              </button>
-              
-              {showSavedList && (
-                <div className="mt-2 max-h-40 overflow-y-auto space-y-1 scrollbar-thin">
-                  {savedPlaylist.map((track) => (
-                    <div
-                      key={track.id}
-                      className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all group"
+          <div className="mt-3">
+            <button
+              onClick={() => setShowSavedList(!showSavedList)}
+              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-all flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <ListMusic className="w-4 h-4" />
+                <span>Your Playlist ({savedPlaylist.length})</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showSavedList ? "rotate-180" : ""}`} />
+            </button>
+            
+            {showSavedList && (
+              <div className="mt-2 max-h-48 overflow-y-auto space-y-1 scrollbar-thin">
+                {savedPlaylist.length > 0 ? (
+                  <>
+                    {/* Play all button */}
+                    <button
+                      onClick={playAllFromList}
+                      className="w-full px-3 py-2 mb-2 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition-all flex items-center justify-center gap-2"
                     >
-                      <button
-                        onClick={() => playSavedTrack(track)}
-                        className="flex-1 text-left text-white/70 text-sm hover:text-white truncate pr-2"
+                      <Play className="w-3 h-3" />
+                      Play All
+                    </button>
+                    {savedPlaylist.map((track, index) => (
+                      <div
+                        key={track.id}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all group ${
+                          isPlayingFromList && currentTrackIndex === index 
+                            ? "bg-red-500/20 text-red-400" 
+                            : "bg-white/5 hover:bg-white/10"
+                        }`}
                       >
-                        <span className="mr-2">{track.isPlaylist ? "📋" : "🎵"}</span>
-                        {track.title}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFromSavedPlaylist(track.id);
-                        }}
-                        className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                        aria-label="Remove from playlist"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Default playlist button */}
-          <button
-            onClick={handlePlayDefaultPlaylist}
-            className="w-full mt-3 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2"
-          >
-            <ListMusic className="w-4 h-4" />
-            Play Lofi Playlist
-          </button>
+                        <button
+                          onClick={() => playSavedTrack(track, index)}
+                          className="flex-1 text-left text-sm hover:text-white truncate pr-2"
+                        >
+                          <span className="mr-2">{track.isPlaylist ? "📋" : "🎵"}</span>
+                          {track.title}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFromSavedPlaylist(track.id);
+                          }}
+                          className="p-1 text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                          aria-label="Remove from playlist"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-white/40 text-xs text-center py-2">
+                    No tracks yet. Add YouTube links above!
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           
           <p className="text-white/40 text-xs mt-2">
             Works with videos & playlists
