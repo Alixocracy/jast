@@ -375,7 +375,7 @@ export function TaskList() {
             {!task.completed && (
               <button
                 onClick={() => moveToBacklog(task)}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all duration-200 p-1 rounded-md hover:bg-primary/10"
+                className="text-muted-foreground hover:text-primary transition-all duration-200 p-1 rounded-md hover:bg-primary/10"
                 title="Move to Backlog"
               >
                 <Archive className="w-4 h-4" />
