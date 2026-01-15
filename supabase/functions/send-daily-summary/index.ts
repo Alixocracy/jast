@@ -23,6 +23,12 @@ interface Task {
   color: string;
 }
 
+interface BacklogTask {
+  id: string;
+  text: string;
+  color: string;
+}
+
 interface Thought {
   id: string;
   text: string;
@@ -42,6 +48,7 @@ interface DailySummaryRequest {
   thoughts: Thought[];
   points: number;
   pointsHistory: PointsHistoryEntry[];
+  backlogTasks: BacklogTask[];
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -60,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, userName, tasks, thoughts, points, pointsHistory = [] }: DailySummaryRequest = await req.json();
+    const { email, userName, tasks, thoughts, points, pointsHistory = [], backlogTasks = [] }: DailySummaryRequest = await req.json();
     
     console.log(`Sending daily summary to ${email} for user ${userName}`);
 
@@ -255,6 +262,30 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 8px 12px; background-color: #fefce8; border-radius: 8px;">
                       <span style="color: #854d0e; font-size: 14px;">○ ${task.text}</span>
+                    </td>
+                  </tr>
+                  <tr><td style="height: 8px;"></td></tr>
+                `).join('')}
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+          
+          <!-- Backlog -->
+          ${backlogTasks.length > 0 ? `
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <h2 style="margin: 0 0 15px; color: #333; font-size: 18px; font-weight: 600;">
+                📦 Backlog (${backlogTasks.length})
+              </h2>
+              <p style="margin: 0 0 12px; color: #888; font-size: 13px;">
+                Tasks saved for later
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                ${backlogTasks.map(task => `
+                  <tr>
+                    <td style="padding: 8px 12px; background-color: #f0f9ff; border-radius: 8px; border-left: 3px solid #0ea5e9;">
+                      <span style="color: #0369a1; font-size: 14px;">○ ${task.text}</span>
                     </td>
                   </tr>
                   <tr><td style="height: 8px;"></td></tr>
