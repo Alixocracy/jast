@@ -17,7 +17,6 @@ interface SavedTrack {
 }
 
 const SAVED_PLAYLIST_KEY = "jast-youtube-saved-playlist";
-const PLAYLIST_INITIALIZED_KEY = "jast-youtube-playlist-initialized";
 
 // Local audio track (always first, non-removable)
 const LOCAL_AUDIO_TRACK: SavedTrack = {
@@ -101,26 +100,27 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
   const containerRef = useRef<HTMLDivElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load saved playlist from localStorage (seed with lofi tracks on first load)
+  // Load saved playlist from localStorage and merge with default tracks
   useEffect(() => {
     try {
       const saved = localStorage.getItem(SAVED_PLAYLIST_KEY);
-      const initialized = localStorage.getItem(PLAYLIST_INITIALIZED_KEY);
       
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Ensure local track is always first
-        const hasLocal = parsed.some((t: SavedTrack) => t.isLocal);
-        if (!hasLocal) {
-          setSavedPlaylist([LOCAL_AUDIO_TRACK, ...parsed]);
-        } else {
-          setSavedPlaylist(parsed);
-        }
-      } else if (!initialized) {
+        // Merge any missing default tracks into the saved playlist
+        const existingIds = new Set(parsed.map((t: SavedTrack) => t.id));
+        const missingDefaults = DEFAULT_LOFI_TRACKS.filter(t => !existingIds.has(t.id));
+        
+        // Ensure local track is first, then other defaults, then user tracks
+        const userTracks = parsed.filter((t: SavedTrack) => !t.isLocal && !DEFAULT_LOFI_TRACKS.some(d => d.id === t.id));
+        const mergedPlaylist = [...DEFAULT_LOFI_TRACKS, ...userTracks];
+        
+        setSavedPlaylist(mergedPlaylist);
+        localStorage.setItem(SAVED_PLAYLIST_KEY, JSON.stringify(mergedPlaylist));
+      } else {
         // First time: seed with default lofi tracks
         setSavedPlaylist(DEFAULT_LOFI_TRACKS);
         localStorage.setItem(SAVED_PLAYLIST_KEY, JSON.stringify(DEFAULT_LOFI_TRACKS));
-        localStorage.setItem(PLAYLIST_INITIALIZED_KEY, "true");
       }
     } catch (e) {
       console.error("Failed to load saved playlist:", e);
