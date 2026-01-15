@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserName } from "@/contexts/UserNameContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { getBacklogTasks } from "@/components/Backlog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -159,6 +160,7 @@ export function EndOfDaySection() {
     setIsSending(true);
     
     const { tasks, thoughts, points, pointsHistory } = getTodayData();
+    const backlogTasks = getBacklogTasks();
     
     try {
       const { data, error } = await supabase.functions.invoke('send-daily-summary', {
@@ -169,6 +171,7 @@ export function EndOfDaySection() {
           thoughts,
           points,
           pointsHistory,
+          backlogTasks,
         },
       });
 
