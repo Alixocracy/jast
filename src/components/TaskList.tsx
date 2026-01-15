@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Sparkles, Palette, Target, GripVertical, Archive } from "lucide-react";
+import { Plus, Check, Sparkles, Palette, Target, GripVertical } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -62,6 +62,7 @@ export function TaskList() {
   const [focusHintTaskId, setFocusHintTaskId] = useState<string | null>(null);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
+  const [isDragOverContainer, setIsDragOverContainer] = useState(false);
   const { addPoints } = usePointsContext();
   const { setFocusedTask, focusedTask } = useFocusMode();
 
@@ -81,6 +82,24 @@ export function TaskList() {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  }, [tasks]);
+
+  // Listen for move-to-backlog events from Backlog component
+  useEffect(() => {
+    const handleMoveToBacklog = (e: CustomEvent<string>) => {
+      const task = tasks.find(t => t.id === e.detail);
+      if (task && !task.completed) {
+        addToBacklog({
+          id: task.id,
+          text: task.text,
+          color: task.color,
+        });
+        setTasks(prev => prev.filter((t) => t.id !== task.id));
+        toast.success("Task moved to backlog");
+      }
+    };
+    window.addEventListener("move-to-backlog", handleMoveToBacklog as EventListener);
+    return () => window.removeEventListener("move-to-backlog", handleMoveToBacklog as EventListener);
   }, [tasks]);
 
   // On first visit, highlight the first incomplete task's focus icon
@@ -210,6 +229,7 @@ export function TaskList() {
     setDraggedTaskId(taskId);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", taskId);
+    e.dataTransfer.setData("source", "today");
   };
 
   const handleDragOver = (e: React.DragEvent, taskId: string) => {
@@ -244,6 +264,43 @@ export function TaskList() {
   const handleDragEnd = () => {
     setDraggedTaskId(null);
     setDragOverTaskId(null);
+    setIsDragOverContainer(false);
+  };
+
+  // Handle drops from backlog onto the task list container
+  const handleContainerDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    const source = e.dataTransfer.types.includes("source") ? "external" : null;
+    if (!draggedTaskId) {
+      setIsDragOverContainer(true);
+    }
+  };
+
+  const handleContainerDragLeave = (e: React.DragEvent) => {
+    // Only set false if we're leaving the container entirely
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOverContainer(false);
+    }
+  };
+
+  const handleContainerDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOverContainer(false);
+    
+    // Check if this is a drop from backlog
+    const taskDataStr = e.dataTransfer.getData("taskData");
+    if (taskDataStr) {
+      try {
+        const taskData = JSON.parse(taskDataStr);
+        const success = addTaskFromBacklog(taskData);
+        if (success) {
+          // Remove from backlog
+          window.dispatchEvent(new CustomEvent("remove-from-backlog", { detail: taskData.id }));
+        }
+      } catch (err) {
+        console.error("Failed to parse task data", err);
+      }
+    }
   };
 
   const completedCount = tasks.filter((t) => t.completed).length;
@@ -258,7 +315,14 @@ export function TaskList() {
   }, [tasks]);
 
   return (
-    <div className="bg-card rounded-2xl p-6 shadow-card animate-fade-in animate-delay-200">
+    <div 
+      className={`bg-card rounded-2xl p-6 shadow-card animate-fade-in animate-delay-200 transition-all duration-200 ${
+        isDragOverContainer ? "ring-2 ring-primary ring-offset-2" : ""
+      }`}
+      onDragOver={handleContainerDragOver}
+      onDragLeave={handleContainerDragLeave}
+      onDrop={handleContainerDrop}
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold text-foreground">Today's Tasks</h2>
@@ -371,16 +435,6 @@ export function TaskList() {
               </button>
             )}
 
-            {/* Move to backlog button - only for incomplete tasks */}
-            {!task.completed && (
-              <button
-                onClick={() => moveToBacklog(task)}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all duration-200 p-1 rounded-md hover:bg-primary/10"
-                title="Move to Backlog"
-              >
-                <Archive className="w-4 h-4" />
-              </button>
-            )}
 
             <Popover>
               <PopoverTrigger asChild>
