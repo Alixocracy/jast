@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Sparkles, Palette, Target, GripVertical } from "lucide-react";
+import { Plus, Check, Sparkles, Palette, Target, GripVertical, Archive } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -9,15 +9,16 @@ import {
 import { usePointsContext } from "@/contexts/PointsContext";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { toast } from "sonner";
+import { addToBacklog } from "@/components/Backlog";
 
-interface Task {
+export interface Task {
   id: string;
   text: string;
   completed: boolean;
   color: string;
 }
 
-const TASK_COLORS = [
+export const TASK_COLORS = [
   { name: "Sage", value: "#A8C5A8" },
   { name: "Lavender", value: "#C5A8C5" },
   { name: "Sky", value: "#A8C5D5" },
@@ -30,6 +31,7 @@ const TASK_COLORS = [
 
 const STORAGE_KEY = "focusflow-tasks";
 const FOCUS_HINT_KEY = "focusflow-focus-hint-seen-v2";
+export const MAX_TODAY_TASKS = 10;
 
 const getStoredTasks = (): Task[] => {
   try {
@@ -105,6 +107,19 @@ export function TaskList() {
 
   const addTask = () => {
     if (newTask.trim()) {
+      const incompleteTasks = tasks.filter(t => !t.completed);
+      if (incompleteTasks.length >= MAX_TODAY_TASKS) {
+        // Move to backlog instead
+        addToBacklog({
+          id: Date.now().toString(),
+          text: newTask.trim(),
+          color: selectedColor,
+        });
+        toast.info("Today's list is full. Task added to backlog.");
+        setNewTask("");
+        setIsAdding(false);
+        return;
+      }
       setTasks([
         ...tasks,
         {
@@ -117,6 +132,35 @@ export function TaskList() {
       setNewTask("");
       setIsAdding(false);
     }
+  };
+
+  const moveToBacklog = (task: Task) => {
+    addToBacklog({
+      id: task.id,
+      text: task.text,
+      color: task.color,
+    });
+    setTasks(tasks.filter((t) => t.id !== task.id));
+    toast.success("Task moved to backlog");
+  };
+
+  const addTaskFromBacklog = (backlogTask: { id: string; text: string; color: string }): boolean => {
+    const incompleteTasks = tasks.filter(t => !t.completed);
+    if (incompleteTasks.length >= MAX_TODAY_TASKS) {
+      toast.error("Today's list is full (max 10 tasks). Complete some tasks first.");
+      return false;
+    }
+    setTasks([
+      ...tasks,
+      {
+        id: backlogTask.id,
+        text: backlogTask.text,
+        completed: false,
+        color: backlogTask.color,
+      },
+    ]);
+    toast.success("Task moved to Today");
+    return true;
   };
 
   const updateTaskColor = (id: string, color: string) => {
@@ -203,11 +247,25 @@ export function TaskList() {
   };
 
   const completedCount = tasks.filter((t) => t.completed).length;
+  const incompleteTasks = tasks.filter((t) => !t.completed);
+
+  // Expose addTaskFromBacklog function
+  useEffect(() => {
+    (window as any).addTaskFromBacklog = addTaskFromBacklog;
+    return () => {
+      delete (window as any).addTaskFromBacklog;
+    };
+  }, [tasks]);
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-card animate-fade-in animate-delay-200">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Today's Tasks</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground">Today's Tasks</h2>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+            {incompleteTasks.length}/{MAX_TODAY_TASKS}
+          </span>
+        </div>
         <span className="text-sm text-muted-foreground">
           {completedCount}/{tasks.length} done
         </span>
@@ -310,6 +368,17 @@ export function TaskList() {
                 title="Focus on this task"
               >
                 <Target className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Move to backlog button - only for incomplete tasks */}
+            {!task.completed && (
+              <button
+                onClick={() => moveToBacklog(task)}
+                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all duration-200 p-1 rounded-md hover:bg-primary/10"
+                title="Move to Backlog"
+              >
+                <Archive className="w-4 h-4" />
               </button>
             )}
 
