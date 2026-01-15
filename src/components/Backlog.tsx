@@ -64,14 +64,22 @@ export function Backlog({ onMoveToToday }: BacklogProps) {
   const [editText, setEditText] = useState("");
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
+  const [isDragOverContainer, setIsDragOverContainer] = useState(false);
 
   // Listen for backlog updates from TaskList
   useEffect(() => {
     const handleBacklogUpdate = () => {
       setBacklogTasks(getBacklogTasks());
     };
+    const handleRemoveFromBacklog = (e: CustomEvent<string>) => {
+      setBacklogTasks(prev => prev.filter(t => t.id !== e.detail));
+    };
     window.addEventListener("backlog-updated", handleBacklogUpdate);
-    return () => window.removeEventListener("backlog-updated", handleBacklogUpdate);
+    window.addEventListener("remove-from-backlog", handleRemoveFromBacklog as EventListener);
+    return () => {
+      window.removeEventListener("backlog-updated", handleBacklogUpdate);
+      window.removeEventListener("remove-from-backlog", handleRemoveFromBacklog as EventListener);
+    };
   }, []);
 
   // Save to localStorage when backlog changes
@@ -120,6 +128,12 @@ export function Backlog({ onMoveToToday }: BacklogProps) {
     setDraggedTaskId(taskId);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", taskId);
+    e.dataTransfer.setData("source", "backlog");
+    // Store task data for cross-component drop
+    const task = backlogTasks.find(t => t.id === taskId);
+    if (task) {
+      e.dataTransfer.setData("taskData", JSON.stringify(task));
+    }
   };
 
   const handleDragOver = (e: React.DragEvent, taskId: string) => {
@@ -154,11 +168,51 @@ export function Backlog({ onMoveToToday }: BacklogProps) {
   const handleDragEnd = () => {
     setDraggedTaskId(null);
     setDragOverTaskId(null);
+    setIsDragOverContainer(false);
+  };
+
+  // Handle drops from Today's Tasks onto the backlog container
+  const handleContainerDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!draggedTaskId) {
+      setIsDragOverContainer(true);
+      // Auto-open when dragging over closed backlog
+      if (!isOpen) {
+        setIsOpen(true);
+      }
+    }
+  };
+
+  const handleContainerDragLeave = (e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOverContainer(false);
+    }
+  };
+
+  const handleContainerDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOverContainer(false);
+    
+    // Check if this is a drop from Today's Tasks
+    const taskId = e.dataTransfer.getData("text/plain");
+    const source = e.dataTransfer.getData("source");
+    
+    if (source === "today" && taskId) {
+      // Trigger event to move task from Today to Backlog
+      window.dispatchEvent(new CustomEvent("move-to-backlog", { detail: taskId }));
+    }
   };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="bg-card rounded-2xl shadow-card animate-fade-in">
+      <div 
+        className={`bg-card rounded-2xl shadow-card animate-fade-in transition-all duration-200 ${
+          isDragOverContainer ? "ring-2 ring-primary ring-offset-2" : ""
+        }`}
+        onDragOver={handleContainerDragOver}
+        onDragLeave={handleContainerDragLeave}
+        onDrop={handleContainerDrop}
+      >
         <CollapsibleTrigger asChild>
           <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors rounded-2xl">
             <div className="flex items-center gap-2">
