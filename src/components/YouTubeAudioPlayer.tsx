@@ -579,14 +579,6 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
           <div className="mt-3 max-h-48 overflow-y-auto space-y-1 scrollbar-thin">
             {savedPlaylist.length > 0 ? (
               <>
-                {/* Play all button */}
-                <button
-                  onClick={playAllFromList}
-                  className="w-full px-3 py-2 mb-2 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition-all flex items-center justify-center gap-2"
-                >
-                  <Play className="w-3 h-3" />
-                  Play All
-                </button>
                 {savedPlaylist.map((track, index) => (
                   <div
                     key={track.id}
@@ -626,10 +618,6 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
               </p>
             )}
           </div>
-          
-          <p className="text-white/40 text-xs mt-2">
-            Works with videos & playlists
-          </p>
           <button
             onClick={() => setShowInput(false)}
             className="absolute top-2 right-2 p-1 text-white/40 hover:text-white/70"
