@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Affirmation } from "@/components/Affirmation";
 import { FocusTimer } from "@/components/FocusTimer";
@@ -9,10 +10,19 @@ import { DreamyFocusOverlay } from "@/components/DreamyFocusOverlay";
 import { OnboardingProvider } from "@/components/OnboardingModal";
 import { EndOfDaySection } from "@/components/EndOfDaySection";
 import { UserNameProvider } from "@/contexts/UserNameContext";
+import { Backlog } from "@/components/Backlog";
 import { MessageCircle, Github } from "lucide-react";
 
 const IndexContent = () => {
   const { isFocusMode } = useFocusMode();
+
+  const handleMoveToToday = (task: { id: string; text: string; color: string }): boolean => {
+    const addTaskFromBacklog = (window as any).addTaskFromBacklog;
+    if (addTaskFromBacklog) {
+      return addTaskFromBacklog(task);
+    }
+    return false;
+  };
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -30,6 +40,7 @@ const IndexContent = () => {
           <div className="space-y-6">
             {/* Hide timer in normal view when focus mode is active */}
             {!isFocusMode && <FocusTimer />}
+            <Backlog onMoveToToday={handleMoveToToday} />
             <QuickActions />
           </div>
           
