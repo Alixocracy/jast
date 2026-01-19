@@ -6,6 +6,7 @@ interface YouTubeAudioPlayerProps {
   isActive: boolean;
   isMuted: boolean;
   onActiveChange: (active: boolean) => void;
+  /** Whether to render in mini/compact mode */
   mini?: boolean;
 }
 

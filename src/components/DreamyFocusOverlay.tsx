@@ -345,7 +345,6 @@ export function DreamyFocusOverlay() {
                   isActive={isYouTubeActive}
                   isMuted={isMuted}
                   onActiveChange={setIsYouTubeActive}
-                  mini={isMinimized}
                 />
 
                 {/* Background picker */}
