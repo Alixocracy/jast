@@ -16,6 +16,8 @@ import cherryBlossom from "@/assets/backgrounds/cherry-blossom.png";
 import lavenderFields from "@/assets/backgrounds/lavender-fields.png";
 import goldenMeadow from "@/assets/backgrounds/golden-meadow.png";
 import tropicalFalls from "@/assets/backgrounds/tropical-falls.png";
+import marsHorizon from "@/assets/backgrounds/mars-horizon.png";
+import alpineDawn from "@/assets/backgrounds/alpine-dawn.png";
 
 const BACKGROUNDS = [
   { id: "forest", name: "Misty Forest", src: mistyForest },
@@ -28,6 +30,8 @@ const BACKGROUNDS = [
   { id: "lavender", name: "Lavender Fields", src: lavenderFields },
   { id: "meadow", name: "Golden Meadow", src: goldenMeadow },
   { id: "tropical", name: "Tropical Falls", src: tropicalFalls },
+  { id: "mars", name: "Mars Horizon", src: marsHorizon },
+  { id: "alpine", name: "Alpine Dawn", src: alpineDawn },
 ];
 
 // Pre-generate stable random values for particles
@@ -302,31 +306,33 @@ export function DreamyFocusOverlay() {
                 {/* Background picker dropdown */}
                 {showBgPicker && (
                   <div 
-                    className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex gap-2 animate-scale-in z-[100] pointer-events-auto"
+                    className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in z-[100] pointer-events-auto"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {BACKGROUNDS.map((bg) => (
-                      <button
-                        key={bg.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedBg(bg);
-                          setShowBgPicker(false);
-                        }}
-                        className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedBg.id === bg.id 
-                            ? "border-white scale-105" 
-                            : "border-transparent hover:border-white/50"
-                        }`}
-                        aria-label={bg.name}
-                      >
-                        <img 
-                          src={bg.src} 
-                          alt={bg.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
+                    <div className="grid grid-cols-6 gap-2">
+                      {BACKGROUNDS.map((bg) => (
+                        <button
+                          key={bg.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedBg(bg);
+                            setShowBgPicker(false);
+                          }}
+                          className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+                            selectedBg.id === bg.id 
+                              ? "border-white scale-105" 
+                              : "border-transparent hover:border-white/50"
+                          }`}
+                          aria-label={bg.name}
+                        >
+                          <img 
+                            src={bg.src} 
+                            alt={bg.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
