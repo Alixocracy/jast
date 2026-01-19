@@ -18,8 +18,16 @@ import goldenMeadow from "@/assets/backgrounds/golden-meadow.png";
 import tropicalFalls from "@/assets/backgrounds/tropical-falls.png";
 import marsHorizon from "@/assets/backgrounds/mars-horizon.png";
 import alpineDawn from "@/assets/backgrounds/alpine-dawn.png";
+import marsPanorama from "@/assets/backgrounds/mars-panorama.png";
 
-const BACKGROUNDS = [
+interface Background {
+  id: string;
+  name: string;
+  src: string;
+  isPanoramic?: boolean;
+}
+
+const BACKGROUNDS: Background[] = [
   { id: "forest", name: "Misty Forest", src: mistyForest },
   { id: "moon", name: "Moonlit Sky", src: moonlitSky },
   { id: "ocean", name: "Ocean Sunset", src: oceanSunset },
@@ -32,6 +40,7 @@ const BACKGROUNDS = [
   { id: "tropical", name: "Tropical Falls", src: tropicalFalls },
   { id: "mars", name: "Mars Horizon", src: marsHorizon },
   { id: "alpine", name: "Alpine Dawn", src: alpineDawn },
+  { id: "mars-pano", name: "Mars Journey", src: marsPanorama, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
@@ -164,11 +173,30 @@ export function DreamyFocusOverlay() {
     >
       {/* Background image with minimal overlay */}
       <div className="absolute inset-0 overflow-hidden">
-        <img 
-          src={selectedBg.src} 
-          alt={selectedBg.name}
-          className="w-full h-full object-cover transition-opacity duration-500"
-        />
+        {selectedBg.isPanoramic ? (
+          /* Panoramic scrolling background - duplicated for seamless loop */
+          <div 
+            className="absolute inset-0 flex animate-pan-horizontal"
+            style={{ width: '200%' }}
+          >
+            <img 
+              src={selectedBg.src} 
+              alt={selectedBg.name}
+              className="h-full w-1/2 object-cover"
+            />
+            <img 
+              src={selectedBg.src} 
+              alt={selectedBg.name}
+              className="h-full w-1/2 object-cover"
+            />
+          </div>
+        ) : (
+          <img 
+            src={selectedBg.src} 
+            alt={selectedBg.name}
+            className="w-full h-full object-cover transition-opacity duration-500"
+          />
+        )}
         {/* Very light overlay to keep background visible */}
         <div className="absolute inset-0 bg-black/15" />
         
@@ -310,8 +338,9 @@ export function DreamyFocusOverlay() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className="flex flex-col gap-2">
+                      {/* First row - static backgrounds */}
                       <div className="flex gap-2">
-                        {BACKGROUNDS.slice(0, 6).map((bg) => (
+                        {BACKGROUNDS.filter(bg => !bg.isPanoramic).slice(0, 6).map((bg) => (
                           <button
                             key={bg.id}
                             onClick={(e) => {
@@ -334,8 +363,9 @@ export function DreamyFocusOverlay() {
                           </button>
                         ))}
                       </div>
+                      {/* Second row - static backgrounds */}
                       <div className="flex gap-2">
-                        {BACKGROUNDS.slice(6).map((bg) => (
+                        {BACKGROUNDS.filter(bg => !bg.isPanoramic).slice(6).map((bg) => (
                           <button
                             key={bg.id}
                             onClick={(e) => {
@@ -355,6 +385,37 @@ export function DreamyFocusOverlay() {
                               alt={bg.name}
                               className="w-full h-full object-cover"
                             />
+                          </button>
+                        ))}
+                      </div>
+                      {/* Third row - panoramic backgrounds */}
+                      <div className="flex gap-2 pt-1 border-t border-white/10">
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`flex-1 h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-[1.02]" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Moving indicator icon */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-white/80 text-[10px] font-medium tracking-wide">
+                                🚀 {bg.name}
+                              </span>
+                            </div>
                           </button>
                         ))}
                       </div>
