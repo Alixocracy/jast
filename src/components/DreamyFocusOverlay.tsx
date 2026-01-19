@@ -293,13 +293,13 @@ export function DreamyFocusOverlay() {
       </div>
 
       {/* Horizontal Control Panel - Top of page (or bottom when minimized) */}
-      <div 
-        className={`relative z-30 flex justify-center transition-all duration-300 ${
-          isMinimized 
-            ? 'absolute left-1/2 -translate-x-1/2' 
-            : 'pt-8'
-        }`}
-        style={isMinimized ? { bottom: 'calc(1.5rem + env(safe-area-inset-bottom))' } : undefined}
+      <div
+        className={
+          isMinimized
+            ? "fixed left-1/2 -translate-x-1/2 z-30 flex justify-center transition-all duration-300"
+            : "relative z-30 flex justify-center pt-8 transition-all duration-300"
+        }
+        style={isMinimized ? { bottom: "calc(1.5rem + env(safe-area-inset-bottom))" } : undefined}
       >
         <div
           className={`flex items-center rounded-2xl bg-black/30 backdrop-blur-md border border-white/10 transition-all duration-300 ${
