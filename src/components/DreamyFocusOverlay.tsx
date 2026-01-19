@@ -306,32 +306,58 @@ export function DreamyFocusOverlay() {
                 {/* Background picker dropdown */}
                 {showBgPicker && (
                   <div 
-                    className="absolute top-full mt-2 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in z-[100] pointer-events-auto"
+                    className="absolute top-full mt-2 right-0 p-3 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 animate-scale-in z-[100] pointer-events-auto"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="grid grid-cols-6 gap-2">
-                      {BACKGROUNDS.map((bg) => (
-                        <button
-                          key={bg.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedBg(bg);
-                            setShowBgPicker(false);
-                          }}
-                          className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                            selectedBg.id === bg.id 
-                              ? "border-white scale-105" 
-                              : "border-transparent hover:border-white/50"
-                          }`}
-                          aria-label={bg.name}
-                        >
-                          <img 
-                            src={bg.src} 
-                            alt={bg.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ))}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        {BACKGROUNDS.slice(0, 6).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-105" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        {BACKGROUNDS.slice(6).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-105" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
