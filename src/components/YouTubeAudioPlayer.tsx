@@ -6,8 +6,8 @@ interface YouTubeAudioPlayerProps {
   isActive: boolean;
   isMuted: boolean;
   onActiveChange: (active: boolean) => void;
-  /** Whether to render in mini/compact mode */
-  mini?: boolean;
+  /** Whether dropdown should open upward (true) or downward (false) */
+  dropdownUp?: boolean;
 }
 
 interface SavedTrack {
@@ -85,7 +85,7 @@ function generateFallbackTitle(url: string): string {
   return "Unknown";
 }
 
-export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, mini = false }: YouTubeAudioPlayerProps) {
+export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, dropdownUp = false }: YouTubeAudioPlayerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
   
@@ -524,7 +524,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, mini = f
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowInput(!showInput)}
-                className={`rounded-lg transition-all ${mini ? 'p-1.5' : 'p-2'} ${
+                className={`p-2 rounded-lg transition-all ${
                   showInput 
                     ? "bg-red-500/30 text-red-400" 
                     : isActive && (videoId || playlistId)
@@ -533,10 +533,10 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, mini = f
                 }`}
                 aria-label="YouTube playlist"
               >
-                <Youtube className={mini ? "w-3 h-3" : "w-4 h-4"} />
+                <Youtube className="w-4 h-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" className="bg-black/80 text-white border-white/20">
+            <TooltipContent side={dropdownUp ? "top" : "bottom"} className="bg-black/80 text-white border-white/20">
               YouTube Playlist
             </TooltipContent>
           </Tooltip>
@@ -546,7 +546,9 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, mini = f
       {/* URL input dropdown */}
       {showInput && (
         <div 
-          className="absolute bottom-full mb-2 right-0 p-3 rounded-xl bg-black/90 backdrop-blur-md border border-white/20 animate-scale-in z-[200] w-80"
+          className={`absolute right-0 p-3 rounded-xl bg-black/90 backdrop-blur-md border border-white/20 animate-scale-in z-[200] w-80 ${
+            dropdownUp ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-2 mb-2">
