@@ -18,7 +18,7 @@ import goldenMeadow from "@/assets/backgrounds/golden-meadow.png";
 import tropicalFalls from "@/assets/backgrounds/tropical-falls.png";
 import marsHorizon from "@/assets/backgrounds/mars-horizon.png";
 import alpineDawn from "@/assets/backgrounds/alpine-dawn.png";
-import marsPanorama from "@/assets/backgrounds/mars-panorama.png";
+import marsPanoramaTile from "@/assets/backgrounds/mars-panorama-tile-hq.png";
 
 interface Background {
   id: string;
@@ -40,7 +40,7 @@ const BACKGROUNDS: Background[] = [
   { id: "tropical", name: "Tropical Falls", src: tropicalFalls },
   { id: "mars", name: "Mars Horizon", src: marsHorizon },
   { id: "alpine", name: "Alpine Dawn", src: alpineDawn },
-  { id: "mars-pano", name: "Mars Journey", src: marsPanorama, isPanoramic: true },
+  { id: "mars-pano", name: "Mars Journey", src: marsPanoramaTile, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
@@ -175,22 +175,27 @@ export function DreamyFocusOverlay() {
       <div className="absolute inset-0 overflow-hidden">
         {selectedBg.isPanoramic ? (
           /* Panoramic scrolling background - duplicated for seamless loop */
-          <div 
-            className="absolute top-0 left-0 h-full flex animate-pan-horizontal"
-            style={{ width: 'calc(600vh * 2)' }}
+          <div
+            className="absolute inset-0 overflow-hidden"
+            aria-hidden="true"
           >
-            <img 
-              src={selectedBg.src} 
-              alt={selectedBg.name}
-              className="h-full object-cover flex-shrink-0"
-              style={{ width: '600vh', aspectRatio: '6/1' }}
-            />
-            <img 
-              src={selectedBg.src} 
-              alt={selectedBg.name}
-              className="h-full object-cover flex-shrink-0"
-              style={{ width: '600vh', aspectRatio: '6/1' }}
-            />
+            <div
+              className="absolute inset-0 flex animate-pan-horizontal"
+              style={{ willChange: "transform" }}
+            >
+              <img
+                src={selectedBg.src}
+                alt=""
+                className="h-full w-auto max-w-none flex-shrink-0 select-none"
+                draggable={false}
+              />
+              <img
+                src={selectedBg.src}
+                alt=""
+                className="h-full w-auto max-w-none flex-shrink-0 select-none"
+                draggable={false}
+              />
+            </div>
           </div>
         ) : (
           <img 
