@@ -6,6 +6,7 @@ interface YouTubeAudioPlayerProps {
   isActive: boolean;
   isMuted: boolean;
   onActiveChange: (active: boolean) => void;
+  mini?: boolean;
 }
 
 interface SavedTrack {
@@ -83,7 +84,7 @@ function generateFallbackTitle(url: string): string {
   return "Unknown";
 }
 
-export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTubeAudioPlayerProps) {
+export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, mini = false }: YouTubeAudioPlayerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
   
@@ -522,7 +523,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowInput(!showInput)}
-                className={`p-2 rounded-lg transition-all ${
+                className={`rounded-lg transition-all ${mini ? 'p-1.5' : 'p-2'} ${
                   showInput 
                     ? "bg-red-500/30 text-red-400" 
                     : isActive && (videoId || playlistId)
@@ -531,10 +532,10 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
                 }`}
                 aria-label="YouTube playlist"
               >
-                <Youtube className="w-4 h-4" />
+                <Youtube className={mini ? "w-3 h-3" : "w-4 h-4"} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-black/80 text-white border-white/20">
+            <TooltipContent side="top" className="bg-black/80 text-white border-white/20">
               YouTube Playlist
             </TooltipContent>
           </Tooltip>
@@ -544,7 +545,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange }: YouTub
       {/* URL input dropdown */}
       {showInput && (
         <div 
-          className="absolute top-full mt-2 right-0 p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in z-[100] w-80"
+          className="absolute bottom-full mb-2 right-0 p-3 rounded-xl bg-black/90 backdrop-blur-md border border-white/20 animate-scale-in z-[200] w-80"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-2 mb-2">
