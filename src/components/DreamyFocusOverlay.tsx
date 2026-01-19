@@ -177,19 +177,16 @@ export function DreamyFocusOverlay() {
           /* Panoramic scrolling background - duplicated for seamless loop */
           <div 
             className="absolute top-0 left-0 h-full flex animate-pan-horizontal"
-            style={{ width: '200vw' }}
           >
             <img 
               src={selectedBg.src} 
               alt={selectedBg.name}
-              className="h-full flex-shrink-0 object-cover"
-              style={{ width: '100vw' }}
+              className="h-full w-auto flex-shrink-0"
             />
             <img 
               src={selectedBg.src} 
               alt={selectedBg.name}
-              className="h-full flex-shrink-0 object-cover"
-              style={{ width: '100vw' }}
+              className="h-full w-auto flex-shrink-0"
             />
           </div>
         ) : (
