@@ -5,7 +5,7 @@ import { useFocusMode } from "@/contexts/FocusModeContext";
 
 interface FocusTimerProps {
   defaultMinutes?: number;
-  compact?: boolean;
+  compact?: boolean | "mini";
 }
 
 export function FocusTimer({ defaultMinutes = 25, compact = false }: FocusTimerProps) {
@@ -181,11 +181,62 @@ export function FocusTimer({ defaultMinutes = 25, compact = false }: FocusTimerP
   const progress = ((selectedDuration * 60 - timeLeft) / (selectedDuration * 60)) * 100;
 
   // Compact SVG dimensions for focus mode (Safari-compatible - no CSS geometry props)
-  const svgSize = compact ? 72 : 160;
-  const circleCenter = compact ? 36 : 80;
-  const circleRadius = compact ? 30 : 70;
-  const strokeWidth = compact ? 5 : 8;
+  const isMini = compact === "mini";
+  const svgSize = isMini ? 40 : compact ? 72 : 160;
+  const circleCenter = isMini ? 20 : compact ? 36 : 80;
+  const circleRadius = isMini ? 16 : compact ? 30 : 70;
+  const strokeWidth = isMini ? 3 : compact ? 5 : 8;
   const circumference = 2 * Math.PI * circleRadius;
+
+  // Mini mode for minimized focus overlay - just timer and play/pause
+  if (isMini) {
+    return (
+      <div className="flex items-center gap-2">
+        {/* Timer circle */}
+        <div className="relative flex items-center justify-center">
+          <svg 
+            width={svgSize} 
+            height={svgSize} 
+            className="transform -rotate-90"
+            style={{ width: svgSize, height: svgSize }}
+          >
+            <circle
+              cx={circleCenter}
+              cy={circleCenter}
+              r={circleRadius}
+              stroke="rgba(255, 255, 255, 0.2)"
+              strokeWidth={strokeWidth}
+              fill="none"
+            />
+            <circle
+              cx={circleCenter}
+              cy={circleCenter}
+              r={circleRadius}
+              stroke="rgba(255, 255, 255, 0.9)"
+              strokeWidth={strokeWidth}
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference - (circumference * progress) / 100}
+              strokeLinecap="round"
+              className="transition-all duration-1000"
+            />
+          </svg>
+          <span className="absolute text-xs font-medium text-white tabular-nums">
+            {formatTime(timeLeft)}
+          </span>
+        </div>
+
+        {/* Play/Pause button */}
+        <button
+          onClick={toggleTimer}
+          className="p-1.5 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all"
+          aria-label={isRunning ? "Pause timer" : "Start timer"}
+        >
+          {isRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+        </button>
+      </div>
+    );
+  }
 
   // Compact mode for focus overlay
   if (compact) {
