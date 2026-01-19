@@ -369,7 +369,9 @@ export function DreamyFocusOverlay() {
                 {/* Background picker dropdown */}
                 {showBgPicker && (
                   <div 
-                    className="absolute bottom-full mb-2 right-0 p-3 rounded-xl bg-black/90 backdrop-blur-md border border-white/20 animate-scale-in z-[200] pointer-events-auto"
+                    className={`absolute right-0 p-3 rounded-xl bg-black/90 backdrop-blur-md border border-white/20 animate-scale-in z-[200] pointer-events-auto ${
+                      isMinimized ? 'bottom-full mb-2' : 'top-full mt-2'
+                    }`}
                     onClick={(e) => e.stopPropagation()}
                     style={{ minWidth: '380px' }}
                   >
@@ -515,9 +517,9 @@ export function DreamyFocusOverlay() {
               </button>
 
               {/* Task picker dropdown */}
-              {showTaskPicker && undoneTasks.length > 1 && (
+              {showTaskPicker && undoneTasks.length > 0 && (
                 <div 
-                  className="absolute bottom-full mb-2 left-0 right-0 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 animate-scale-in max-h-[300px] overflow-y-auto"
+                  className="absolute bottom-full mb-2 left-0 right-0 p-2 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 animate-scale-in max-h-[300px] overflow-y-auto z-[100]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <p className="text-white/40 text-xs px-2 py-1 mb-1">Switch to another task</p>
