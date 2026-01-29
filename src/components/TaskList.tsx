@@ -523,7 +523,7 @@ export function TaskList() {
               onClick={() => handleFocusTask(incompleteTasks[0])}
             >
               <Target className="w-4 h-4 mr-2" />
-              Focus
+              Start focus
             </Button>
           )}
         </div>
