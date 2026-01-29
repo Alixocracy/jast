@@ -2,8 +2,11 @@ import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useFocusMode } from "@/contexts/FocusModeContext";
 import { FocusTimer } from "./FocusTimer";
 import { YouTubeAudioPlayer } from "./YouTubeAudioPlayer";
-import { X, Volume2, VolumeX, Image, ChevronDown, Check, Minimize2, Maximize2 } from "lucide-react";
+import { X, Volume2, VolumeX, Image, ChevronDown, Check, Minimize2, Maximize2, Plus, Pencil } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { TASK_COLORS, MAX_TODAY_TASKS } from "./TaskList";
+import { addToBacklog } from "@/components/Backlog";
 
 // Import background images
 import mistyForest from "@/assets/backgrounds/misty-forest.png";
@@ -79,28 +82,123 @@ export function DreamyFocusOverlay() {
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [isYouTubeActive, setIsYouTubeActive] = useState(false);
   const [showTaskPicker, setShowTaskPicker] = useState(false);
-  const [undoneTasks, setUndoneTasks] = useState<Task[]>([]);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskText, setNewTaskText] = useState("");
+  const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0].value);
 
   // Memoize particles so they don't regenerate on every render
   const dustParticles = useMemo(() => generateDustParticles(), []);
   const stars = useMemo(() => generateStars(), []);
 
-  // Load undone tasks from localStorage
+  // Load tasks from localStorage
   useEffect(() => {
     if (isFocusMode) {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
           const tasks: Task[] = JSON.parse(stored);
-          const undone = tasks.filter(t => !t.completed);
-          setUndoneTasks(undone);
+          setAllTasks(tasks);
         }
       } catch (e) {
         console.error("Failed to load tasks", e);
       }
     }
   }, [isFocusMode]);
+
+  // Derived undone tasks
+  const undoneTasks = useMemo(() => allTasks.filter(t => !t.completed), [allTasks]);
+
+  // Save tasks to localStorage when modified
+  const saveTasks = useCallback((tasks: Task[]) => {
+    setAllTasks(tasks);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    // Dispatch event to notify TaskList component
+    window.dispatchEvent(new CustomEvent("tasks-updated-from-focus"));
+  }, []);
+
+  // Toggle task completion
+  const handleToggleTask = useCallback((taskId: string) => {
+    const task = allTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const updatedTasks = allTasks.map(t => 
+      t.id === taskId ? { ...t, completed: !t.completed } : t
+    );
+    saveTasks(updatedTasks);
+    
+    if (!task.completed) {
+      toast.success("Task completed! 🎉");
+      // If this was the focused task, switch to another undone task
+      if (focusedTask?.id === taskId) {
+        const nextUndone = updatedTasks.find(t => !t.completed && t.id !== taskId);
+        if (nextUndone) {
+          setFocusedTask({ id: nextUndone.id, text: nextUndone.text, color: nextUndone.color });
+        }
+      }
+    }
+  }, [allTasks, saveTasks, focusedTask, setFocusedTask]);
+
+  // Edit task text
+  const handleStartEdit = useCallback((task: Task) => {
+    setEditingTaskId(task.id);
+    setEditText(task.text);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    if (!editingTaskId || !editText.trim()) {
+      setEditingTaskId(null);
+      setEditText("");
+      return;
+    }
+    
+    const updatedTasks = allTasks.map(t =>
+      t.id === editingTaskId ? { ...t, text: editText.trim() } : t
+    );
+    saveTasks(updatedTasks);
+    
+    // Update focused task if it was edited
+    if (focusedTask?.id === editingTaskId) {
+      setFocusedTask({ ...focusedTask, text: editText.trim() });
+    }
+    
+    setEditingTaskId(null);
+    setEditText("");
+  }, [editingTaskId, editText, allTasks, saveTasks, focusedTask, setFocusedTask]);
+
+  // Add new task
+  const handleAddTask = useCallback(() => {
+    if (!newTaskText.trim()) {
+      setIsAddingTask(false);
+      return;
+    }
+    
+    const incompleteTasks = allTasks.filter(t => !t.completed);
+    if (incompleteTasks.length >= MAX_TODAY_TASKS) {
+      // Add to backlog instead
+      addToBacklog({
+        id: Date.now().toString(),
+        text: newTaskText.trim(),
+        color: selectedColor,
+      });
+      toast.info("Today's list is full. Task added to backlog.");
+    } else {
+      const newTask: Task = {
+        id: Date.now().toString(),
+        text: newTaskText.trim(),
+        completed: false,
+        color: selectedColor,
+      };
+      saveTasks([...allTasks, newTask]);
+      toast.success("Task added!");
+    }
+    
+    setNewTaskText("");
+    setIsAddingTask(false);
+  }, [newTaskText, selectedColor, allTasks, saveTasks]);
 
   const exitFocusMode = useCallback(() => {
     setFocusedTask(null);
@@ -519,41 +617,149 @@ export function DreamyFocusOverlay() {
               </button>
 
               {/* Task picker dropdown */}
-              {showTaskPicker && undoneTasks.length > 0 && (
+              {showTaskPicker && (
                 <div 
-                  className="absolute bottom-full mb-2 left-0 right-0 p-2 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 animate-scale-in max-h-[300px] overflow-y-auto z-[100]"
+                  className="absolute bottom-full mb-2 left-0 right-0 p-2 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 animate-scale-in max-h-[350px] overflow-y-auto z-[100]"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <p className="text-white/40 text-xs px-2 py-1 mb-1">Switch to another task</p>
+                  <p className="text-white/40 text-xs px-2 py-1 mb-1">Manage tasks</p>
+                  
+                  {/* Undone tasks */}
                   {undoneTasks.map((task) => (
-                    <button
+                    <div
                       key={task.id}
-                      onClick={() => {
-                        setFocusedTask({
-                          id: task.id,
-                          text: task.text,
-                          color: task.color,
-                        });
-                        setShowTaskPicker(false);
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg transition-all group ${
                         focusedTask.id === task.id 
                           ? 'bg-white/20' 
                           : 'hover:bg-white/10'
                       }`}
                     >
+                      {/* Complete button */}
+                      <button
+                        onClick={() => handleToggleTask(task.id)}
+                        className="w-5 h-5 rounded-full border-2 border-white/40 hover:border-white flex items-center justify-center transition-all shrink-0 hover:bg-white/20"
+                        title="Mark as done"
+                      >
+                        <Check className="w-3 h-3 text-white/0 hover:text-white/70" />
+                      </button>
+                      
+                      {/* Task text / edit input */}
+                      {editingTaskId === task.id ? (
+                        <input
+                          type="text"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveEdit();
+                            if (e.key === "Escape") {
+                              setEditingTaskId(null);
+                              setEditText("");
+                            }
+                          }}
+                          onBlur={handleSaveEdit}
+                          className="flex-1 bg-white/10 text-white text-sm px-2 py-1 rounded border border-white/30 focus:outline-none focus:border-white/60"
+                          autoFocus
+                        />
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setFocusedTask({
+                              id: task.id,
+                              text: task.text,
+                              color: task.color,
+                            });
+                            setShowTaskPicker(false);
+                          }}
+                          className="flex-1 text-white text-sm text-left truncate"
+                        >
+                          {task.text}
+                        </button>
+                      )}
+                      
+                      {/* Color indicator */}
                       <div 
-                        className="w-3 h-3 rounded-full shrink-0"
+                        className="w-2 h-2 rounded-full shrink-0"
                         style={{ backgroundColor: task.color }}
                       />
-                      <span className="text-white text-sm text-left flex-1 truncate">
-                        {task.text}
-                      </span>
-                      {focusedTask.id === task.id && (
-                        <Check className="w-4 h-4 text-white/70 shrink-0" />
+                      
+                      {/* Edit button */}
+                      {editingTaskId !== task.id && (
+                        <button
+                          onClick={() => handleStartEdit(task)}
+                          className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white transition-all p-1"
+                          title="Edit task"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
                       )}
-                    </button>
+                      
+                      {/* Current focus indicator */}
+                      {focusedTask.id === task.id && (
+                        <div className="text-white/50 text-xs">focusing</div>
+                      )}
+                    </div>
                   ))}
+                  
+                  {/* Add new task section */}
+                  <div className="mt-2 pt-2 border-t border-white/10">
+                    {isAddingTask ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={newTaskText}
+                          onChange={(e) => setNewTaskText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleAddTask();
+                            if (e.key === "Escape") {
+                              setIsAddingTask(false);
+                              setNewTaskText("");
+                            }
+                          }}
+                          placeholder="New task..."
+                          className="w-full bg-white/10 text-white text-sm px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:border-white/40 placeholder:text-white/30"
+                          autoFocus
+                        />
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/40 text-xs">Color:</span>
+                          {TASK_COLORS.slice(0, 6).map((color) => (
+                            <button
+                              key={color.value}
+                              onClick={() => setSelectedColor(color.value)}
+                              className={`w-4 h-4 rounded-full border-2 transition-all hover:scale-110 ${
+                                selectedColor === color.value ? 'border-white' : 'border-transparent'
+                              }`}
+                              style={{ backgroundColor: color.value }}
+                              title={color.name}
+                            />
+                          ))}
+                          <div className="flex-1" />
+                          <button
+                            onClick={() => {
+                              setIsAddingTask(false);
+                              setNewTaskText("");
+                            }}
+                            className="text-white/50 hover:text-white text-xs px-2 py-1"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleAddTask}
+                            className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1 rounded-lg transition-all"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setIsAddingTask(true)}
+                        className="w-full flex items-center gap-2 p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="text-sm">Add a task</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
