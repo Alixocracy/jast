@@ -507,14 +507,27 @@ export function TaskList() {
           </div>
         </div>
       ) : (
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-muted-foreground hover:text-foreground"
-          onClick={() => setIsAdding(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add a task
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            className="flex-1 justify-start text-muted-foreground hover:text-foreground"
+            onClick={() => setIsAdding(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add a task
+          </Button>
+          {incompleteTasks.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => handleFocusTask(incompleteTasks[0])}
+            >
+              <Target className="w-4 h-4" />
+              Focus
+            </Button>
+          )}
+        </div>
       )}
 
       {completedCount === tasks.length && tasks.length > 0 && (
