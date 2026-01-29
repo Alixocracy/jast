@@ -518,12 +518,11 @@ export function TaskList() {
           </Button>
           {incompleteTasks.length > 0 && (
             <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
+              variant="ghost"
+              className="justify-start text-muted-foreground hover:text-foreground"
               onClick={() => handleFocusTask(incompleteTasks[0])}
             >
-              <Target className="w-4 h-4" />
+              <Target className="w-4 h-4 mr-2" />
               Focus
             </Button>
           )}
