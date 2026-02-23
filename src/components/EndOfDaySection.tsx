@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatTimeSpent } from "@/components/TaskList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -118,7 +119,10 @@ export function EndOfDaySection() {
     ];
 
     if (completedTasks.length) {
-      completedTasks.forEach(task => lines.push(`- [x] ${task.text}`));
+      completedTasks.forEach(task => {
+        const timeStr = (task as any).timeSpent ? ` (${formatTimeSpent((task as any).timeSpent)})` : '';
+        lines.push(`- [x] ${task.text}${timeStr}`);
+      });
     } else {
       lines.push("- None yet - tomorrow is a new day!");
     }
@@ -126,7 +130,10 @@ export function EndOfDaySection() {
     lines.push("", `## Pending Tasks (${pendingTasks.length})`);
 
     if (pendingTasks.length) {
-      pendingTasks.forEach(task => lines.push(`- [ ] ${task.text}`));
+      pendingTasks.forEach(task => {
+        const timeStr = (task as any).timeSpent ? ` (${formatTimeSpent((task as any).timeSpent)})` : '';
+        lines.push(`- [ ] ${task.text}${timeStr}`);
+      });
     } else {
       lines.push("- Nothing pending - nice work!");
     }
