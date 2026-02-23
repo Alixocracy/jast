@@ -95,6 +95,22 @@ export function TaskList() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
+  // Listen for time updates from FocusModeContext
+  useEffect(() => {
+    const handleTimeUpdate = () => {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          setTasks(JSON.parse(stored));
+        } catch (e) {
+          console.error("Failed to parse tasks", e);
+        }
+      }
+    };
+    window.addEventListener("tasks-updated-from-focus", handleTimeUpdate);
+    return () => window.removeEventListener("tasks-updated-from-focus", handleTimeUpdate);
+  }, []);
+
   // Listen for move-to-backlog events from Backlog component
   useEffect(() => {
     const handleMoveToBacklog = (e: CustomEvent<string>) => {
