@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Sparkles, Palette, Target, GripVertical } from "lucide-react";
+import { Plus, Check, Sparkles, Palette, Target, GripVertical, Clock } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -16,7 +16,18 @@ export interface Task {
   text: string;
   completed: boolean;
   color: string;
+  timeSpent?: number; // seconds
 }
+
+export const formatTimeSpent = (seconds: number): string => {
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins < 60) return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  const remainMins = mins % 60;
+  return remainMins > 0 ? `${hrs}h ${remainMins}m` : `${hrs}h`;
+};
 
 export const TASK_COLORS = [
   { name: "Sage", value: "#A8C5A8" },
@@ -407,6 +418,12 @@ export function TaskList() {
                   title={task.completed ? undefined : "Click to edit"}
                 >
                   {task.text}
+                </span>
+              )}
+              {(task.timeSpent ?? 0) > 0 && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap" title={`Time spent: ${formatTimeSpent(task.timeSpent!)}`}>
+                  <Clock className="w-3 h-3" />
+                  {formatTimeSpent(task.timeSpent!)}
                 </span>
               )}
             </div>

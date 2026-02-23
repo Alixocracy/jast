@@ -21,6 +21,7 @@ interface Task {
   text: string;
   completed: boolean;
   color: string;
+  timeSpent?: number;
 }
 
 interface BacklogTask {
@@ -49,6 +50,16 @@ interface DailySummaryRequest {
   points: number;
   pointsHistory: PointsHistoryEntry[];
   backlogTasks: BacklogTask[];
+}
+
+function formatTimeSpent(seconds: number): string {
+  if (seconds < 60) return seconds + "s";
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins < 60) return secs > 0 ? mins + "m " + secs + "s" : mins + "m";
+  const hrs = Math.floor(mins / 60);
+  const remainMins = mins % 60;
+  return remainMins > 0 ? hrs + "h " + remainMins + "m" : hrs + "h";
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -114,6 +125,27 @@ const handler = async (req: Request): Promise<Response> => {
     const wellnessPoints = pointsHistory.filter(h => ['Drink Water', 'Deep Breath', 'Take a Walk', 'Mindful Break'].includes(h.action)).reduce((sum, h) => sum + h.points, 0);
     const focusPoints = pointsHistory.filter(h => h.action.includes('Focus')).reduce((sum, h) => sum + h.points, 0);
     const otherPoints = pointsHistory.filter(h => !h.action.includes('task') && !['Drink Water', 'Deep Breath', 'Take a Walk', 'Mindful Break'].includes(h.action) && !h.action.includes('Focus')).reduce((sum, h) => sum + h.points, 0);
+
+    const totalTimeSpent = tasks.reduce((sum, t) => sum + (t.timeSpent || 0), 0);
+
+    const taskTimeLabel = (task: Task) => {
+      if (!task.timeSpent) return '';
+      return ' <span style="color: #888; font-size: 12px;">⏱ ' + formatTimeSpent(task.timeSpent) + '</span>';
+    };
+
+    const totalFocusTimeHtml = totalTimeSpent > 0 ? `
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <div style="background: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #bae6fd;">
+                <span style="font-size: 24px;">⏱</span>
+                <p style="margin: 6px 0 0; color: #0369a1; font-size: 20px; font-weight: 700;">
+                  ${formatTimeSpent(totalTimeSpent)}
+                </p>
+                <p style="margin: 4px 0 0; color: #0284c7; font-size: 12px;">Total focus time today</p>
+              </div>
+            </td>
+          </tr>
+    ` : '';
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -225,6 +257,8 @@ const handler = async (req: Request): Promise<Response> => {
             </td>
           </tr>
           
+          ${totalFocusTimeHtml}
+          
           <!-- Completed Tasks -->
           <tr>
             <td style="padding: 0 30px 20px;">
@@ -236,7 +270,7 @@ const handler = async (req: Request): Promise<Response> => {
                   ${completedTasks.map(task => `
                     <tr>
                       <td style="padding: 8px 12px; background-color: #f0fdf4; border-radius: 8px; margin-bottom: 8px;">
-                        <span style="color: #166534; font-size: 14px;">✓ ${task.text}</span>
+                        <span style="color: #166534; font-size: 14px;">✓ ${task.text}${taskTimeLabel(task)}</span>
                       </td>
                     </tr>
                     <tr><td style="height: 8px;"></td></tr>
@@ -261,7 +295,7 @@ const handler = async (req: Request): Promise<Response> => {
                 ${pendingTasks.map(task => `
                   <tr>
                     <td style="padding: 8px 12px; background-color: #fefce8; border-radius: 8px;">
-                      <span style="color: #854d0e; font-size: 14px;">○ ${task.text}</span>
+                      <span style="color: #854d0e; font-size: 14px;">○ ${task.text}${taskTimeLabel(task)}</span>
                     </td>
                   </tr>
                   <tr><td style="height: 8px;"></td></tr>
