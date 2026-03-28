@@ -100,7 +100,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, dropdown
   const [savedPlaylist, setSavedPlaylist] = useState<SavedTrack[]>([]);
   const playerRef = useRef<YT.Player | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load saved playlist from localStorage and merge with default tracks
   useEffect(() => {

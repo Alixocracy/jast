@@ -100,7 +100,7 @@ export function FocusTimer({ defaultMinutes = 25, compact = false }: FocusTimerP
   }, [timeLeft, isRunning, setInitialTimerSeconds, setIsTimerRunning]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
