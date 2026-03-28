@@ -24,6 +24,9 @@ import alpineDawn from "@/assets/backgrounds/alpine-dawn.png";
 import marsPanoramaTile from "@/assets/backgrounds/mars-panorama-tile-hq.png";
 import oceanDepthsPanorama from "@/assets/backgrounds/ocean-depths-panorama.png";
 import skyIslandsPanorama from "@/assets/backgrounds/sky-islands-panorama.png";
+import galaxyPanorama from "@/assets/backgrounds/galaxy-panorama.png";
+import enchantedForestPanorama from "@/assets/backgrounds/enchanted-forest-panorama.png";
+import auroraPanorama from "@/assets/backgrounds/aurora-panorama.png";
 
 interface Background {
   id: string;
