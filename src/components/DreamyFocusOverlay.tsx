@@ -51,6 +51,9 @@ const BACKGROUNDS: Background[] = [
   { id: "mars-pano", name: "Mars Journey", src: marsPanoramaTile, isPanoramic: true },
   { id: "ocean-pano", name: "Ocean Depths", src: oceanDepthsPanorama, isPanoramic: true },
   { id: "sky-pano", name: "Sky Islands", src: skyIslandsPanorama, isPanoramic: true },
+  { id: "galaxy-pano", name: "Galaxy", src: galaxyPanorama, isPanoramic: true },
+  { id: "enchanted-pano", name: "Enchanted Forest", src: enchantedForestPanorama, isPanoramic: true },
+  { id: "aurora-pano", name: "Aurora Borealis", src: auroraPanorama, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
