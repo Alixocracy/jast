@@ -24,6 +24,9 @@ import alpineDawn from "@/assets/backgrounds/alpine-dawn.png";
 import marsPanoramaTile from "@/assets/backgrounds/mars-panorama-tile-hq.png";
 import oceanDepthsPanorama from "@/assets/backgrounds/ocean-depths-panorama.png";
 import skyIslandsPanorama from "@/assets/backgrounds/sky-islands-panorama.png";
+import galaxyPanorama from "@/assets/backgrounds/galaxy-panorama.png";
+import enchantedForestPanorama from "@/assets/backgrounds/enchanted-forest-panorama.png";
+import auroraPanorama from "@/assets/backgrounds/aurora-panorama.png";
 
 interface Background {
   id: string;
@@ -48,6 +51,9 @@ const BACKGROUNDS: Background[] = [
   { id: "mars-pano", name: "Mars Journey", src: marsPanoramaTile, isPanoramic: true },
   { id: "ocean-pano", name: "Ocean Depths", src: oceanDepthsPanorama, isPanoramic: true },
   { id: "sky-pano", name: "Sky Islands", src: skyIslandsPanorama, isPanoramic: true },
+  { id: "galaxy-pano", name: "Galaxy", src: galaxyPanorama, isPanoramic: true },
+  { id: "enchanted-pano", name: "Enchanted Forest", src: enchantedForestPanorama, isPanoramic: true },
+  { id: "aurora-pano", name: "Aurora Borealis", src: auroraPanorama, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
