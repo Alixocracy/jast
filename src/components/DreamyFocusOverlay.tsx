@@ -538,7 +538,7 @@ export function DreamyFocusOverlay() {
                       </div>
                       {/* Third row - panoramic backgrounds */}
                       <div className="flex gap-2 pt-1 border-t border-white/10">
-                        {BACKGROUNDS.filter(bg => bg.isPanoramic).map((bg) => (
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(0, 3).map((bg) => (
                           <button
                             key={bg.id}
                             onClick={(e) => {
@@ -546,11 +546,12 @@ export function DreamyFocusOverlay() {
                               setSelectedBg(bg);
                               setShowBgPicker(false);
                             }}
-                            className={`flex-1 h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
+                            className={`h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
                               selectedBg.id === bg.id 
                                 ? "border-white scale-[1.02]" 
                                 : "border-transparent hover:border-white/50"
                             }`}
+                            style={{ width: 'calc((3.5rem * 2) + 0.5rem)' }}
                             aria-label={bg.name}
                           >
                             <img 
@@ -558,7 +559,37 @@ export function DreamyFocusOverlay() {
                               alt={bg.name}
                               className="w-full h-full object-cover"
                             />
-                            {/* Moving indicator icon */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-white/80 text-[10px] font-medium tracking-wide">
+                                🚀 {bg.name}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Fourth row - panoramic backgrounds */}
+                      <div className="flex gap-2">
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(3).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-[1.02]" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            style={{ width: 'calc((3.5rem * 2) + 0.5rem)' }}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                               <span className="text-white/80 text-[10px] font-medium tracking-wide">
                                 🚀 {bg.name}
