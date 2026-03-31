@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext, type ReactNode, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Heart, Target, Brain, ArrowRight } from "lucide-react";
+import { Sparkles, Shield, Target, Mountain, ArrowRight, Mail, ListChecks } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -77,7 +77,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 <div className="space-y-2 flex-1">
                   <DialogTitle className="text-xl">Hi there! I'm JAST</DialogTitle>
                   <p className="text-muted-foreground">
-                    I'm your personal wellbeing assistant, here to help you stay focused and organized throughout the day.
+                    Your daily companion for managing tasks, staying focused, and wrapping up each day with clarity.
                   </p>
                 </div>
                 <JastAvatar size={140} className="shadow-lg ring-1 ring-black/5 shrink-0" />
@@ -93,31 +93,41 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             <div className="space-y-4">
               <div className="space-y-3 py-4">
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
-                  <Target className="w-5 h-5 text-primary mt-0.5" />
+                  <ListChecks className="w-5 h-5 text-primary mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm">Start Small</p>
+                    <p className="font-medium text-sm">Simple Daily Tasks</p>
                     <p className="text-xs text-muted-foreground">
-                      A productive day is a set of small focused periods. Pick a few important tasks — don't try to create a perfect plan upfront
+                      Pick a few important tasks each morning. Use the brain dump for stray thoughts so they don't break your flow
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
-                  <Brain className="w-5 h-5 text-primary mt-0.5" />
+                  <Mountain className="w-5 h-5 text-primary mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm">Brain Dump</p>
+                    <p className="font-medium text-sm">Immersive Focus Mode</p>
                     <p className="text-xs text-muted-foreground">
-                      Ideas come, distractions happen. Don't let them grab your attention — put them in the brain dump and think about them later
+                      Enter a full-screen zen space with scenic landscapes, a Pomodoro timer, and your own YouTube music to stay in the zone
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
-                  <Heart className="w-5 h-5 text-primary mt-0.5" />
+                  <Mail className="w-5 h-5 text-primary mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm">No Account Needed</p>
+                    <p className="font-medium text-sm">End-of-Day Summary</p>
                     <p className="text-xs text-muted-foreground">
-                      Just start using it! Your data stays safe in your browser. Only the optional summary email goes through the server
+                      Review what you accomplished, reflect on your day, and optionally receive a summary report by email
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                  <Shield className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm">100% Private & Local</p>
+                    <p className="text-xs text-muted-foreground">
+                      No account, no tracking. Everything lives in your browser. Only the optional summary email leaves your device
                     </p>
                   </div>
                 </div>
