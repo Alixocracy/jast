@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext, type ReactNode, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Shield, Target, Landscape, ArrowRight, Mail, ListChecks } from "lucide-react";
+import { Sparkles, Shield, Target, Mountain, ArrowRight, Mail, ListChecks } from "lucide-react";
 import {
   Dialog,
   DialogContent,
