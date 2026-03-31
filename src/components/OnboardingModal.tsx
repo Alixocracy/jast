@@ -77,7 +77,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 <div className="space-y-2 flex-1">
                   <DialogTitle className="text-xl">Hi there! I'm JAST</DialogTitle>
                   <p className="text-muted-foreground">
-                    I'm your personal wellbeing assistant, here to help you stay focused and organized throughout the day.
+                    Your daily companion for managing tasks, staying focused, and wrapping up each day with clarity.
                   </p>
                 </div>
                 <JastAvatar size={140} className="shadow-lg ring-1 ring-black/5 shrink-0" />
