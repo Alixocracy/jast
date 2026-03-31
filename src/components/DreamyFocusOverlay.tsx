@@ -27,6 +27,9 @@ import skyIslandsPanorama from "@/assets/backgrounds/sky-islands-panorama.png";
 import galaxyPanorama from "@/assets/backgrounds/galaxy-panorama.png";
 import enchantedForestPanorama from "@/assets/backgrounds/enchanted-forest-panorama.png";
 import auroraPanorama from "@/assets/backgrounds/aurora-panorama.png";
+import zenTemplePanorama from "@/assets/backgrounds/zen-temple-panorama.png";
+import desertTwilightPanorama from "@/assets/backgrounds/desert-twilight-panorama.png";
+import coralReefPanorama from "@/assets/backgrounds/coral-reef-panorama.png";
 
 interface Background {
   id: string;
@@ -54,6 +57,9 @@ const BACKGROUNDS: Background[] = [
   { id: "galaxy-pano", name: "Galaxy", src: galaxyPanorama, isPanoramic: true },
   { id: "enchanted-pano", name: "Enchanted Forest", src: enchantedForestPanorama, isPanoramic: true },
   { id: "aurora-pano", name: "Aurora Borealis", src: auroraPanorama, isPanoramic: true },
+  { id: "zen-temple-pano", name: "Zen Temple", src: zenTemplePanorama, isPanoramic: true },
+  { id: "desert-pano", name: "Desert Twilight", src: desertTwilightPanorama, isPanoramic: true },
+  { id: "coral-pano", name: "Coral Reef", src: coralReefPanorama, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
