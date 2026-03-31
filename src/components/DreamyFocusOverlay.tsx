@@ -27,6 +27,9 @@ import skyIslandsPanorama from "@/assets/backgrounds/sky-islands-panorama.png";
 import galaxyPanorama from "@/assets/backgrounds/galaxy-panorama.png";
 import enchantedForestPanorama from "@/assets/backgrounds/enchanted-forest-panorama.png";
 import auroraPanorama from "@/assets/backgrounds/aurora-panorama.png";
+import zenTemplePanorama from "@/assets/backgrounds/zen-temple-panorama.png";
+import desertTwilightPanorama from "@/assets/backgrounds/desert-twilight-panorama.png";
+import coralReefPanorama from "@/assets/backgrounds/coral-reef-panorama.png";
 
 interface Background {
   id: string;
@@ -54,6 +57,9 @@ const BACKGROUNDS: Background[] = [
   { id: "galaxy-pano", name: "Galaxy", src: galaxyPanorama, isPanoramic: true },
   { id: "enchanted-pano", name: "Enchanted Forest", src: enchantedForestPanorama, isPanoramic: true },
   { id: "aurora-pano", name: "Aurora Borealis", src: auroraPanorama, isPanoramic: true },
+  { id: "zen-temple-pano", name: "Zen Temple", src: zenTemplePanorama, isPanoramic: true },
+  { id: "desert-pano", name: "Desert Twilight", src: desertTwilightPanorama, isPanoramic: true },
+  { id: "coral-pano", name: "Coral Reef", src: coralReefPanorama, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
@@ -569,7 +575,38 @@ export function DreamyFocusOverlay() {
                       </div>
                       {/* Fourth row - panoramic backgrounds */}
                       <div className="flex gap-2">
-                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(3).map((bg) => (
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(3, 6).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-[1.02]" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            style={{ width: 'calc((3.5rem * 2) + 0.5rem)' }}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-white/80 text-[10px] font-medium tracking-wide">
+                                🚀 {bg.name}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Fifth row - panoramic backgrounds */}
+                      <div className="flex gap-2">
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(6).map((bg) => (
                           <button
                             key={bg.id}
                             onClick={(e) => {
