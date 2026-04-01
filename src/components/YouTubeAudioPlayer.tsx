@@ -38,6 +38,7 @@ const DEFAULT_LOFI_TRACKS: SavedTrack[] = [
   { id: "k9ts6p63ns0", url: "https://www.youtube.com/watch?v=k9ts6p63ns0", title: "Relaxing Lofi", isPlaylist: false },
   { id: "sAcj8me7wGI", url: "https://www.youtube.com/watch?v=sAcj8me7wGI", title: "Focus Beats", isPlaylist: false },
   { id: "acjs8sDZDro", url: "https://www.youtube.com/watch?v=acjs8sDZDro", title: "Peaceful Lofi", isPlaylist: false },
+  { id: "YQhGqu_qhcc", url: "https://www.youtube.com/watch?v=YQhGqu_qhcc", title: "Lofi Chill Mix", isPlaylist: false },
 ];
 
 // Extract video ID from various YouTube URL formats
