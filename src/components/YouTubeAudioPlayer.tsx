@@ -176,7 +176,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, dropdown
 
   // Remove track from saved playlist (except local track)
   const removeFromSavedPlaylist = useCallback((id: string) => {
-    if (id === LOCAL_AUDIO_TRACK.id) return; // Cannot remove local track
+    if (LOCAL_AUDIO_TRACKS.some(t => t.id === id)) return; // Cannot remove local tracks
     savePlaylists(savedPlaylist.filter(t => t.id !== id));
   }, [savedPlaylist, savePlaylists]);
 
