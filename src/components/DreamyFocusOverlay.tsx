@@ -106,6 +106,7 @@ export function DreamyFocusOverlay() {
   const { isFocusMode, focusedTask, setFocusedTask } = useFocusMode();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [localTrackUrl, setLocalTrackUrl] = useState("/audio/suno-custom.m4a");
   const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0]);
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [isYouTubeActive, setIsYouTubeActive] = useState(false);
@@ -247,10 +248,14 @@ export function DreamyFocusOverlay() {
   // Handle local audio playback (only when YouTube is not active)
   useEffect(() => {
     if (isFocusMode && !isYouTubeActive) {
-      if (!audioRef.current) {
-        audioRef.current = new Audio("/audio/dreamer.mp3");
+      if (!audioRef.current || audioRef.current.src !== new URL(localTrackUrl, window.location.origin).href) {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        audioRef.current = new Audio(localTrackUrl);
         audioRef.current.loop = true;
         audioRef.current.volume = 0.3;
+        audioRef.current.muted = isMuted;
       }
       
       // Play audio with user interaction handling
@@ -275,7 +280,7 @@ export function DreamyFocusOverlay() {
         audioRef.current.pause();
       }
     };
-  }, [isFocusMode, isYouTubeActive]);
+  }, [isFocusMode, isYouTubeActive, localTrackUrl]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -472,6 +477,7 @@ export function DreamyFocusOverlay() {
                   isActive={isYouTubeActive}
                   isMuted={isMuted}
                   onActiveChange={setIsYouTubeActive}
+                  onLocalTrackChange={setLocalTrackUrl}
                   dropdownUp={isMinimized}
                 />
 
