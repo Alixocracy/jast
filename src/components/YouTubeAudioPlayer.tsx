@@ -6,6 +6,7 @@ interface YouTubeAudioPlayerProps {
   isActive: boolean;
   isMuted: boolean;
   onActiveChange: (active: boolean) => void;
+  onLocalTrackChange?: (url: string) => void;
   /** Whether dropdown should open upward (true) or downward (false) */
   dropdownUp?: boolean;
 }
@@ -95,7 +96,7 @@ function generateFallbackTitle(url: string): string {
   return "Unknown";
 }
 
-export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, dropdownUp = false }: YouTubeAudioPlayerProps) {
+export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, onLocalTrackChange, dropdownUp = false }: YouTubeAudioPlayerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
   
@@ -196,6 +197,7 @@ export function YouTubeAudioPlayer({ isActive, isMuted, onActiveChange, dropdown
       setVideoId(null);
       setPlaylistId(null);
       setShowInput(false);
+      onLocalTrackChange?.(track.url);
       onActiveChange(false); // This will trigger local audio in DreamyFocusOverlay
       return;
     }
