@@ -20,18 +20,27 @@ interface SavedTrack {
 
 const SAVED_PLAYLIST_KEY = "jast-youtube-saved-playlist";
 
-// Local audio track (always first, non-removable)
-const LOCAL_AUDIO_TRACK: SavedTrack = {
-  id: "local-dreamer",
-  url: "/audio/dreamer.mp3",
-  title: "Dreamer (Local)",
-  isPlaylist: false,
-  isLocal: true,
-};
+// Local audio tracks (always first, non-removable)
+const LOCAL_AUDIO_TRACKS: SavedTrack[] = [
+  {
+    id: "local-dreamer",
+    url: "/audio/dreamer.mp3",
+    title: "Dreamer (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
+  {
+    id: "local-suno-custom",
+    url: "/audio/suno-custom.m4a",
+    title: "Custom Suno Track (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
+];
 
 // Default lofi tracks to seed the playlist
 const DEFAULT_LOFI_TRACKS: SavedTrack[] = [
-  LOCAL_AUDIO_TRACK,
+  ...LOCAL_AUDIO_TRACKS,
   { id: "cKxRFlXYquo", url: "https://www.youtube.com/watch?v=cKxRFlXYquo", title: "Lofi Hip Hop Radio", isPlaylist: false },
   { id: "RG2IK8oRZNA", url: "https://www.youtube.com/watch?v=RG2IK8oRZNA", title: "Chill Lofi Beats", isPlaylist: false },
   { id: "k2w_tU8Cy9c", url: "https://www.youtube.com/watch?v=k2w_tU8Cy9c", title: "Study Music Mix", isPlaylist: false },
