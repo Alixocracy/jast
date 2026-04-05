@@ -32,7 +32,7 @@ const LOCAL_AUDIO_TRACKS: SavedTrack[] = [
   {
     id: "local-suno-custom",
     url: "/audio/suno-custom.m4a",
-    title: "Custom Suno Track (Local)",
+    title: "Calm Focus (Local)",
     isPlaylist: false,
     isLocal: true,
   },
