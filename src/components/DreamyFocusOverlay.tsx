@@ -30,6 +30,12 @@ import auroraPanorama from "@/assets/backgrounds/aurora-panorama.png";
 import zenTemplePanorama from "@/assets/backgrounds/zen-temple-panorama.png";
 import desertTwilightPanorama from "@/assets/backgrounds/desert-twilight-panorama.png";
 import coralReefPanorama from "@/assets/backgrounds/coral-reef-panorama.png";
+import fjordMajestyPanorama from "@/assets/backgrounds/fjord-majesty-panorama.png";
+import savannaGoldenPanorama from "@/assets/backgrounds/savanna-golden-panorama.png";
+import autumnValleyPanorama from "@/assets/backgrounds/autumn-valley-panorama.png";
+import arcticCrystalPanorama from "@/assets/backgrounds/arctic-crystal-panorama.png";
+import volcanicParadisePanorama from "@/assets/backgrounds/volcanic-paradise-panorama.png";
+import himalayaSunrisePanorama from "@/assets/backgrounds/himalaya-sunrise-panorama.png";
 
 interface Background {
   id: string;
@@ -60,6 +66,12 @@ const BACKGROUNDS: Background[] = [
   { id: "zen-temple-pano", name: "Zen Temple", src: zenTemplePanorama, isPanoramic: true },
   { id: "desert-pano", name: "Desert Twilight", src: desertTwilightPanorama, isPanoramic: true },
   { id: "coral-pano", name: "Coral Reef", src: coralReefPanorama, isPanoramic: true },
+  { id: "fjord-pano", name: "Fjord Majesty", src: fjordMajestyPanorama, isPanoramic: true },
+  { id: "savanna-pano", name: "Golden Savanna", src: savannaGoldenPanorama, isPanoramic: true },
+  { id: "autumn-pano", name: "Autumn Valley", src: autumnValleyPanorama, isPanoramic: true },
+  { id: "arctic-pano", name: "Arctic Crystal", src: arcticCrystalPanorama, isPanoramic: true },
+  { id: "volcanic-pano", name: "Volcanic Paradise", src: volcanicParadisePanorama, isPanoramic: true },
+  { id: "himalaya-pano", name: "Himalaya Sunrise", src: himalayaSunrisePanorama, isPanoramic: true },
 ];
 
 // Pre-generate stable random values for particles
@@ -606,7 +618,69 @@ export function DreamyFocusOverlay() {
                       </div>
                       {/* Fifth row - panoramic backgrounds */}
                       <div className="flex gap-2">
-                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(6).map((bg) => (
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(6, 9).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-[1.02]" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            style={{ width: 'calc((3.5rem * 2) + 0.5rem)' }}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-white/80 text-[10px] font-medium tracking-wide">
+                                🚀 {bg.name}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Sixth row - panoramic backgrounds */}
+                      <div className="flex gap-2">
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(9, 12).map((bg) => (
+                          <button
+                            key={bg.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBg(bg);
+                              setShowBgPicker(false);
+                            }}
+                            className={`h-10 rounded-lg overflow-hidden border-2 transition-all relative ${
+                              selectedBg.id === bg.id 
+                                ? "border-white scale-[1.02]" 
+                                : "border-transparent hover:border-white/50"
+                            }`}
+                            style={{ width: 'calc((3.5rem * 2) + 0.5rem)' }}
+                            aria-label={bg.name}
+                          >
+                            <img 
+                              src={bg.src} 
+                              alt={bg.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-white/80 text-[10px] font-medium tracking-wide">
+                                🚀 {bg.name}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Seventh row - panoramic backgrounds */}
+                      <div className="flex gap-2">
+                        {BACKGROUNDS.filter(bg => bg.isPanoramic).slice(12).map((bg) => (
                           <button
                             key={bg.id}
                             onClick={(e) => {
