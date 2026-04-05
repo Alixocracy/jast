@@ -23,16 +23,16 @@ const SAVED_PLAYLIST_KEY = "jast-youtube-saved-playlist";
 // Local audio tracks (always first, non-removable)
 const LOCAL_AUDIO_TRACKS: SavedTrack[] = [
   {
-    id: "local-dreamer",
-    url: "/audio/dreamer.mp3",
-    title: "Dreamer (Local)",
+    id: "local-suno-custom",
+    url: "/audio/suno-custom.m4a",
+    title: "Calm Focus (Local)",
     isPlaylist: false,
     isLocal: true,
   },
   {
-    id: "local-suno-custom",
-    url: "/audio/suno-custom.m4a",
-    title: "Calm Focus (Local)",
+    id: "local-dreamer",
+    url: "/audio/dreamer.mp3",
+    title: "Dreamer (Local)",
     isPlaylist: false,
     isLocal: true,
   },
