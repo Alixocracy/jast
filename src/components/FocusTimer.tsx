@@ -9,7 +9,7 @@ interface FocusTimerProps {
 }
 
 export function FocusTimer({ defaultMinutes = 25, compact = false }: FocusTimerProps) {
-  const { isFocusMode, initialTimerSeconds, setInitialTimerSeconds, isTimerRunning, setIsTimerRunning } = useFocusMode();
+  const { isFocusMode, initialTimerSeconds, setInitialTimerSeconds, isTimerRunning, setIsTimerRunning, focusedTask } = useFocusMode();
   
   // Initialize from context values so timer persists across focus mode transitions
   const [timeLeft, setTimeLeft] = useState(() => initialTimerSeconds);
