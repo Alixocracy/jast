@@ -117,9 +117,14 @@ export function FocusTimer({ defaultMinutes = 25, compact = false }: FocusTimerP
     const prev = previousTimeLeftRef.current;
     if (prev > 0 && timeLeft === 0) {
       playAlarmSequence();
+      window.dispatchEvent(
+        new CustomEvent("jast-timer-finished", {
+          detail: { task: focusedTask?.text },
+        }),
+      );
     }
     previousTimeLeftRef.current = timeLeft;
-  }, [playAlarmSequence, timeLeft]);
+  }, [playAlarmSequence, timeLeft, focusedTask]);
 
   const toggleTimer = useCallback(() => {
     setIsRunning((prev) => !prev);

@@ -161,6 +161,9 @@ export function DreamyFocusOverlay() {
     
     if (!task.completed) {
       toast.success("Task completed! 🎉");
+      window.dispatchEvent(
+        new CustomEvent("jast-task-completed", { detail: { id: task.id, text: task.text } }),
+      );
       // If this was the focused task, switch to another undone task
       if (focusedTask?.id === taskId) {
         const nextUndone = updatedTasks.find(t => !t.completed && t.id !== taskId);
