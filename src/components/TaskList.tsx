@@ -220,6 +220,9 @@ export function TaskList() {
     if (task && !task.completed) {
       addPoints("Completed task", 2);
       toast.success("+2 points for completing a task! ⭐");
+      window.dispatchEvent(
+        new CustomEvent("jast-task-completed", { detail: { id: task.id, text: task.text } }),
+      );
     }
     setTasks(
       tasks.map((t) =>
