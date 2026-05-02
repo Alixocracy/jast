@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { RefreshCw, Heart } from "lucide-react";
-import { PointsDisplay } from "./PointsDisplay";
-import { usePointsContext } from "@/contexts/PointsContext";
 
 const affirmations = [
   "You are capable of amazing things.",
