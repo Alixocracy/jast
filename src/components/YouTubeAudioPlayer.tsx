@@ -37,6 +37,27 @@ const LOCAL_AUDIO_TRACKS: SavedTrack[] = [
     isPlaylist: false,
     isLocal: true,
   },
+  {
+    id: "local-rain-on-spring",
+    url: "/audio/rain-on-spring.mp3",
+    title: "Rain on Spring (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
+  {
+    id: "local-rain-on-ivory",
+    url: "/audio/rain-on-ivory.mp3",
+    title: "Rain on Ivory (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
+  {
+    id: "local-paper-window",
+    url: "/audio/paper-window.mp3",
+    title: "Paper Window (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
 ];
 
 // Default lofi tracks to seed the playlist
