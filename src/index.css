@@ -127,6 +127,64 @@
     --sidebar-border: 160 15% 20%;
     --sidebar-ring: 150 35% 55%;
   }
+
+  .cloudy {
+    /* Turquoise sky / cloudy day palette */
+    --background: 190 60% 96%;
+    --foreground: 200 40% 18%;
+
+    --card: 190 55% 98%;
+    --card-foreground: 200 40% 18%;
+
+    --popover: 190 55% 98%;
+    --popover-foreground: 200 40% 18%;
+
+    /* Turquoise primary */
+    --primary: 180 55% 42%;
+    --primary-foreground: 190 60% 98%;
+
+    --secondary: 190 40% 92%;
+    --secondary-foreground: 200 40% 22%;
+
+    --muted: 190 35% 90%;
+    --muted-foreground: 200 20% 40%;
+
+    --accent: 175 50% 88%;
+    --accent-foreground: 190 50% 22%;
+
+    --destructive: 10 70% 58%;
+    --destructive-foreground: 190 60% 98%;
+
+    --border: 190 40% 85%;
+    --input: 190 40% 85%;
+    --ring: 180 55% 42%;
+
+    --calm: 185 45% 85%;
+    --calm-foreground: 190 50% 22%;
+    --focus: 195 60% 50%;
+    --focus-foreground: 195 60% 98%;
+    --energy: 35 75% 55%;
+    --energy-foreground: 35 80% 15%;
+    --gentle: 200 40% 88%;
+    --gentle-foreground: 200 40% 28%;
+
+    --gradient-calm: linear-gradient(135deg, hsl(185 55% 92%) 0%, hsl(195 50% 95%) 100%);
+    --gradient-focus: linear-gradient(135deg, hsl(195 55% 92%) 0%, hsl(180 45% 90%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(190 50% 94%) 0%, hsl(175 40% 92%) 100%);
+
+    --shadow-soft: 0 4px 20px -4px hsl(195 50% 25% / 0.12);
+    --shadow-card: 0 2px 12px -2px hsl(195 50% 25% / 0.08);
+    --shadow-glow: 0 0 30px hsl(180 55% 50% / 0.2);
+
+    --sidebar-background: 190 55% 96%;
+    --sidebar-foreground: 200 40% 22%;
+    --sidebar-primary: 180 55% 42%;
+    --sidebar-primary-foreground: 190 60% 98%;
+    --sidebar-accent: 190 40% 90%;
+    --sidebar-accent-foreground: 200 40% 22%;
+    --sidebar-border: 190 40% 85%;
+    --sidebar-ring: 180 55% 42%;
+  }
 }
 
 @layer base {
