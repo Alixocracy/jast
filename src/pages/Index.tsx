@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { Affirmation } from "@/components/Affirmation";
+
 import { FocusTimer } from "@/components/FocusTimer";
 import { TaskList } from "@/components/TaskList";
 import { BrainDump } from "@/components/BrainDump";
