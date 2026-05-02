@@ -94,7 +94,11 @@ const Index = () => {
     <UserNameProvider>
       <OnboardingProvider>
         <FocusModeProvider>
-          <IndexContent />
+          <JastProvider>
+            <IndexContent />
+            <JastDrawer />
+            <JastNudgeListener />
+          </JastProvider>
         </FocusModeProvider>
       </OnboardingProvider>
     </UserNameProvider>
