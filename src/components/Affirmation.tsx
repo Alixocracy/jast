@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { RefreshCw, Heart } from "lucide-react";
-import { PointsDisplay } from "./PointsDisplay";
-import { usePointsContext } from "@/contexts/PointsContext";
 
 const affirmations = [
   "You are capable of amazing things.",
@@ -132,7 +130,6 @@ const affirmations = [
 export function Affirmation() {
   const [currentAffirmation, setCurrentAffirmation] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
-  const { total, history, resetPoints } = usePointsContext();
 
   const getNewAffirmation = () => {
     setIsAnimating(true);
@@ -148,33 +145,28 @@ export function Affirmation() {
   }, []);
 
   return (
-    <div className="gradient-warm rounded-2xl p-6 shadow-card animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-3">
-            <Heart className="w-4 h-4 text-energy" />
-            <span className="text-xs font-medium text-accent-foreground/70 uppercase tracking-wide">
-              Daily Reminder
-            </span>
-            <button
-              onClick={getNewAffirmation}
-              className="ml-1 p-2 rounded-full text-accent-foreground/60 hover:text-accent-foreground hover:bg-white/10 transition-colors"
-              aria-label="New reminder"
-            >
-              <RefreshCw className={`w-4 h-4 ${isAnimating ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-          
-          <p
-            className={`text-xl font-medium text-accent-foreground mb-4 min-h-[3.5rem] transition-all duration-200 ${
-              isAnimating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
-            }`}
+    <div className="mt-3 flex items-start gap-2 animate-fade-in">
+      <Heart className="w-4 h-4 text-energy mt-1 shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+            Daily Reminder
+          </span>
+          <button
+            onClick={getNewAffirmation}
+            className="p-1 rounded-full text-muted-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+            aria-label="New reminder"
           >
-            {currentAffirmation}
-          </p>
+            <RefreshCw className={`w-3 h-3 ${isAnimating ? "animate-spin" : ""}`} />
+          </button>
         </div>
-
-        <PointsDisplay total={total} history={history} onReset={resetPoints} />
+        <p
+          className={`text-sm text-foreground/90 transition-all duration-200 ${
+            isAnimating ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
+          }`}
+        >
+          {currentAffirmation}
+        </p>
       </div>
     </div>
   );

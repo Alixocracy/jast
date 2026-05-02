@@ -3,9 +3,12 @@ import { useJast } from "@/contexts/JastContext";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { JastAvatar } from "./JastAvatar";
+import { PointsDisplay } from "./PointsDisplay";
+import { usePointsContext } from "@/contexts/PointsContext";
 
 export function JastCompanionCard() {
   const { settings, updateSettings, openChat, unread } = useJast();
+  const { total, history, resetPoints } = usePointsContext();
 
   return (
     <div className="bg-card rounded-2xl p-5 shadow-card animate-fade-in border border-border/50">
@@ -21,9 +24,29 @@ export function JastCompanionCard() {
                 ? "Chat, ask for help, or get gentle nudges."
                 : "Turn on a friendly mentor to chat with throughout the day."}
             </p>
+            {settings.enabled && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Button onClick={openChat} size="sm" className="relative">
+                  <MessageCircle className="w-4 h-4" />
+                  Open chat
+                  {unread > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-energy text-energy-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      {unread}
+                    </span>
+                  )}
+                </Button>
+                <button
+                  onClick={openChat}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Settings & sharing →
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
+          <PointsDisplay total={total} history={history} onReset={resetPoints} />
           <Switch
             checked={settings.enabled}
             onCheckedChange={(v) => updateSettings({ enabled: v })}
@@ -31,26 +54,6 @@ export function JastCompanionCard() {
           />
         </div>
       </div>
-
-      {settings.enabled && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Button onClick={openChat} size="sm" className="relative">
-            <MessageCircle className="w-4 h-4" />
-            Open chat
-            {unread > 0 && (
-              <span className="absolute -top-1 -right-1 bg-energy text-energy-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                {unread}
-              </span>
-            )}
-          </Button>
-          <button
-            onClick={openChat}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            Settings & sharing →
-          </button>
-        </div>
-      )}
     </div>
   );
 }
