@@ -11,6 +11,10 @@ import { OnboardingProvider } from "@/components/OnboardingModal";
 import { EndOfDaySection } from "@/components/EndOfDaySection";
 import { UserNameProvider } from "@/contexts/UserNameContext";
 import { Backlog } from "@/components/Backlog";
+import { JastProvider } from "@/contexts/JastContext";
+import { JastCompanionCard } from "@/components/JastCompanionCard";
+import { JastDrawer } from "@/components/JastDrawer";
+import { JastNudgeListener } from "@/components/JastNudgeListener";
 import { MessageCircle, Github } from "lucide-react";
 
 const IndexContent = () => {
