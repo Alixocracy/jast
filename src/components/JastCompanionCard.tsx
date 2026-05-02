@@ -3,12 +3,9 @@ import { useJast } from "@/contexts/JastContext";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { JastAvatar } from "./JastAvatar";
-import { PointsDisplay } from "./PointsDisplay";
-import { usePointsContext } from "@/contexts/PointsContext";
 
 export function JastCompanionCard() {
   const { settings, updateSettings, openChat, unread } = useJast();
-  const { total, history, resetPoints } = usePointsContext();
 
   return (
     <div className="bg-card rounded-2xl p-5 shadow-card animate-fade-in border border-border/50">
@@ -45,14 +42,12 @@ export function JastCompanionCard() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <PointsDisplay total={total} history={history} onReset={resetPoints} />
-          <Switch
-            checked={settings.enabled}
-            onCheckedChange={(v) => updateSettings({ enabled: v })}
-            aria-label="Enable JAST"
-          />
-        </div>
+        <Switch
+          checked={settings.enabled}
+          onCheckedChange={(v) => updateSettings({ enabled: v })}
+          aria-label="Enable JAST"
+          className="shrink-0"
+        />
       </div>
     </div>
   );

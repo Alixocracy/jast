@@ -3,10 +3,13 @@ import { ThemeToggle } from "./ThemeToggle";
 import { JastAvatar } from "./JastAvatar";
 import { useOnboarding } from "./OnboardingModal";
 import { Affirmation } from "./Affirmation";
+import { PointsDisplay } from "./PointsDisplay";
+import { usePointsContext } from "@/contexts/PointsContext";
 
 export function Header() {
   const { userName } = useUserName();
   const { openOnboarding } = useOnboarding();
+  const { total, history, resetPoints } = usePointsContext();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -43,7 +46,10 @@ export function Header() {
             <Affirmation />
           </div>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-3 shrink-0">
+          <PointsDisplay total={total} history={history} onReset={resetPoints} />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
