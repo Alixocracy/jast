@@ -1,7 +1,8 @@
-import { Sparkles, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useJast } from "@/contexts/JastContext";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { JastAvatar } from "./JastAvatar";
 
 export function JastCompanionCard() {
   const { settings, updateSettings, openChat, unread } = useJast();
@@ -10,9 +11,7 @@ export function JastCompanionCard() {
     <div className="bg-card rounded-2xl p-5 shadow-card animate-fade-in border border-border/50">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className="rounded-full bg-primary/10 p-2.5 shrink-0">
-            <Sparkles className="w-5 h-5 text-primary" />
-          </div>
+          <JastAvatar size={40} className="shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="text-base font-semibold text-foreground">JAST · Your AI companion</h3>
