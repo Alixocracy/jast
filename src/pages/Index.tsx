@@ -36,8 +36,9 @@ const IndexContent = () => {
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8 relative">
         <Header />
         
-        <div className="mb-6">
+        <div className="mb-6 space-y-4">
           <Affirmation />
+          <JastCompanionCard />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
