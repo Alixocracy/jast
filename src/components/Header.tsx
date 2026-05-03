@@ -67,6 +67,7 @@ export function Header() {
               AI
             </span>
           </button>
+          <div className="w-4" aria-hidden="true" />
           <div className="scale-110 origin-right">
             <ThemeToggle />
           </div>
