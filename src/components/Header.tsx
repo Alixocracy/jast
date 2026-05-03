@@ -50,17 +50,27 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <label
-            className="flex items-center gap-1.5 cursor-pointer select-none"
-            title={settings.enabled ? "JAST is on" : "Enable JAST"}
+          <button
+            type="button"
+            onClick={() => updateSettings({ enabled: !settings.enabled })}
+            aria-label={settings.enabled ? "Disable JAST" : "Enable JAST"}
+            title={settings.enabled ? "JAST is on — click to disable" : "JAST is off — click to enable"}
+            className="relative rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           >
-            <JastAvatar size={22} />
-            <Switch
-              checked={settings.enabled}
-              onCheckedChange={(v) => updateSettings({ enabled: v })}
-              aria-label="Enable JAST"
+            <JastAvatar
+              size={32}
+              className={
+                settings.enabled
+                  ? "ring-2 ring-primary shadow-glow"
+                  : "grayscale opacity-50 hover:opacity-80"
+              }
             />
-          </label>
+            <span
+              className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ${
+                settings.enabled ? "bg-emerald-500" : "bg-muted-foreground/50"
+              }`}
+            />
+          </button>
           <div className="scale-110 origin-right">
             <ThemeToggle />
           </div>
