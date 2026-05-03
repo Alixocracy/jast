@@ -1,5 +1,6 @@
 import { useUserName } from "@/contexts/UserNameContext";
 import { ThemeToggle } from "./ThemeToggle";
+import { Sparkles } from "lucide-react";
 import { JastAvatar } from "./JastAvatar";
 import { useOnboarding } from "./OnboardingModal";
 import { Affirmation } from "./Affirmation";
