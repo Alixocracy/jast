@@ -1,5 +1,6 @@
 import { useUserName } from "@/contexts/UserNameContext";
 import { ThemeToggle } from "./ThemeToggle";
+import { Sparkles } from "lucide-react";
 import { JastAvatar } from "./JastAvatar";
 import { useOnboarding } from "./OnboardingModal";
 import { Affirmation } from "./Affirmation";
@@ -53,23 +54,18 @@ export function Header() {
           <button
             type="button"
             onClick={() => updateSettings({ enabled: !settings.enabled })}
-            aria-label={settings.enabled ? "Disable JAST" : "Enable JAST"}
-            title={settings.enabled ? "JAST is on — click to disable" : "JAST is off — click to enable"}
-            className="relative rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            aria-label={settings.enabled ? "Disable AI companion" : "Enable AI companion"}
+            title={settings.enabled ? "AI is on — click to disable" : "AI is off — click to enable"}
+            className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+              settings.enabled
+                ? "bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-glow"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
           >
-            <JastAvatar
-              size={32}
-              className={
-                settings.enabled
-                  ? "ring-2 ring-primary shadow-glow"
-                  : "grayscale opacity-50 hover:opacity-80"
-              }
-            />
-            <span
-              className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ${
-                settings.enabled ? "bg-emerald-500" : "bg-muted-foreground/50"
-              }`}
-            />
+            <Sparkles className="w-4 h-4" strokeWidth={2.25} />
+            <span className="absolute -top-1 -right-1 text-[8px] font-bold leading-none px-1 py-0.5 rounded-full bg-background text-foreground border border-border shadow-sm">
+              AI
+            </span>
           </button>
           <div className="scale-110 origin-right">
             <ThemeToggle />
