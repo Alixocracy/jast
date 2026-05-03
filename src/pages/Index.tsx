@@ -12,9 +12,9 @@ import { EndOfDaySection } from "@/components/EndOfDaySection";
 import { UserNameProvider } from "@/contexts/UserNameContext";
 import { Backlog } from "@/components/Backlog";
 import { JastProvider } from "@/contexts/JastContext";
-import { JastCompanionCard } from "@/components/JastCompanionCard";
 import { JastDrawer } from "@/components/JastDrawer";
 import { JastNudgeListener } from "@/components/JastNudgeListener";
+import { JastFloatingButton } from "@/components/JastFloatingButton";
 import { MessageCircle, Github } from "lucide-react";
 
 const IndexContent = () => {
@@ -35,10 +35,7 @@ const IndexContent = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8 relative">
         <Header />
-        
-        <div className="mb-6">
-          <JastCompanionCard />
-        </div>
+
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-6">
@@ -91,15 +88,16 @@ const IndexContent = () => {
 const Index = () => {
   return (
     <UserNameProvider>
-      <OnboardingProvider>
-        <FocusModeProvider>
-          <JastProvider>
+      <FocusModeProvider>
+        <JastProvider>
+          <OnboardingProvider>
             <IndexContent />
             <JastDrawer />
             <JastNudgeListener />
-          </JastProvider>
-        </FocusModeProvider>
-      </OnboardingProvider>
+            <JastFloatingButton />
+          </OnboardingProvider>
+        </JastProvider>
+      </FocusModeProvider>
     </UserNameProvider>
   );
 };
