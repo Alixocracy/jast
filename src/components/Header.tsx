@@ -5,11 +5,14 @@ import { useOnboarding } from "./OnboardingModal";
 import { Affirmation } from "./Affirmation";
 import { PointsDisplay } from "./PointsDisplay";
 import { usePointsContext } from "@/contexts/PointsContext";
+import { Switch } from "@/components/ui/switch";
+import { useJast } from "@/contexts/JastContext";
 
 export function Header() {
   const { userName } = useUserName();
   const { openOnboarding } = useOnboarding();
   const { total, history, resetPoints } = usePointsContext();
+  const { settings, updateSettings } = useJast();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -47,8 +50,21 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
+          <label
+            className="flex items-center gap-1.5 cursor-pointer select-none"
+            title={settings.enabled ? "JAST is on" : "Enable JAST"}
+          >
+            <JastAvatar size={22} />
+            <Switch
+              checked={settings.enabled}
+              onCheckedChange={(v) => updateSettings({ enabled: v })}
+              aria-label="Enable JAST"
+            />
+          </label>
+          <div className="scale-110 origin-right">
+            <ThemeToggle />
+          </div>
           <PointsDisplay total={total} history={history} onReset={resetPoints} />
-          <ThemeToggle />
         </div>
       </div>
     </header>
