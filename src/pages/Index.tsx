@@ -88,16 +88,16 @@ const IndexContent = () => {
 const Index = () => {
   return (
     <UserNameProvider>
-      <OnboardingProvider>
-        <FocusModeProvider>
-          <JastProvider>
+      <FocusModeProvider>
+        <JastProvider>
+          <OnboardingProvider>
             <IndexContent />
             <JastDrawer />
             <JastNudgeListener />
             <JastFloatingButton />
-          </JastProvider>
-        </FocusModeProvider>
-      </OnboardingProvider>
+          </OnboardingProvider>
+        </JastProvider>
+      </FocusModeProvider>
     </UserNameProvider>
   );
 };
