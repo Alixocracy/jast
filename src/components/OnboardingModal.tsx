@@ -132,7 +132,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                   <div>
                     <p className="font-medium text-sm">100% Private & Local</p>
                     <p className="text-xs text-muted-foreground">
-                      No account, no tracking. Everything lives in your browser. Only the optional summary email leaves your device
+                      No account, no tracking. Everything lives in your browser. Only the optional summary email — and, if you enable the AI companion, your chat messages sent to the AI provider — leave your device
                     </p>
                   </div>
                 </div>
