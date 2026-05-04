@@ -144,13 +144,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           )}
 
           {step === 2 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <JastAvatar size={40} />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-2.5">
+                  <JastAvatar size={32} />
                   <div>
-                    <p className="font-medium text-sm">Enable JAST companion</p>
-                    <p className="text-xs text-muted-foreground">Chat, get nudges, and gentle help</p>
+                    <p className="font-medium text-sm leading-tight">Enable JAST companion</p>
+                    <p className="text-xs text-muted-foreground leading-tight">Chat, nudges & gentle help</p>
                   </div>
                 </div>
                 <Switch
@@ -160,48 +160,44 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
               </div>
 
               {settings.enabled && (
-                <div className="space-y-4 animate-fade-in">
+                <div className="space-y-3 animate-fade-in">
                   <div>
-                    <Label className="text-xs uppercase tracking-wide text-muted-foreground">Personality</Label>
-                    <div className="mt-2 grid gap-2">
+                    <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Personality</Label>
+                    <div className="mt-1.5 grid grid-cols-3 gap-1.5">
                       {TONES.map((t) => (
                         <button
                           key={t.id}
                           type="button"
                           onClick={() => updateSettings({ tone: t.id })}
                           className={cn(
-                            "text-left rounded-lg border px-3 py-2 transition-all",
+                            "text-left rounded-lg border px-2 py-1.5 transition-all",
                             settings.tone === t.id
                               ? "border-primary bg-primary/10"
                               : "border-border hover:bg-muted"
                           )}
                         >
-                          <div className="text-sm font-medium">{t.label}</div>
-                          <div className="text-xs text-muted-foreground">{t.desc}</div>
+                          <div className="text-xs font-medium leading-tight">{t.label}</div>
+                          <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{t.desc}</div>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t">
-                    <Label className="text-xs uppercase tracking-wide text-muted-foreground">What can JAST see?</Label>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t">
+                    <Label className="col-span-2 text-[10px] uppercase tracking-wide text-muted-foreground">What can JAST see?</Label>
                     <Row label="Today's tasks" checked={settings.shareTasks} onChange={(v) => updateSettings({ shareTasks: v })} />
                     <Row label="Backlog" checked={settings.shareBacklog} onChange={(v) => updateSettings({ shareBacklog: v })} />
                     <Row label="Brain dump" checked={settings.shareBrainDump} onChange={(v) => updateSettings({ shareBrainDump: v })} />
                     <Row label="Progress today" checked={settings.shareProgress} onChange={(v) => updateSettings({ shareProgress: v })} />
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t">
-                    <Label className="text-xs uppercase tracking-wide text-muted-foreground">Proactive nudges</Label>
-                    <Row label="Comment after each task done" checked={settings.commentOnTaskDone} onChange={(v) => updateSettings({ commentOnTaskDone: v })} />
-                    <Row label="Suggest break when timer ends" checked={settings.commentOnTimerEnd} onChange={(v) => updateSettings({ commentOnTimerEnd: v })} />
+                  <div className="grid grid-cols-1 gap-y-1 pt-2 border-t">
+                    <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Proactive nudges</Label>
+                    <Row label="Comment after task done" checked={settings.commentOnTaskDone} onChange={(v) => updateSettings({ commentOnTaskDone: v })} />
+                    <Row label="Break when timer ends" checked={settings.commentOnTimerEnd} onChange={(v) => updateSettings({ commentOnTimerEnd: v })} />
                   </div>
                 </div>
               )}
-
-              <p className="text-xs text-muted-foreground text-center">
-                You can change this anytime from the top bar.
-              </p>
 
               <Button onClick={handleNext} className="w-full gap-2">
                 Continue <ArrowRight className="w-4 h-4" />
