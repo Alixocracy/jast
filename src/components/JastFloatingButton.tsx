@@ -8,7 +8,7 @@ export function JastFloatingButton() {
     <button
       onClick={openChat}
       aria-label="Open JAST chat"
-      className="fixed bottom-5 right-5 z-40 rounded-full shadow-glow hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary/50"
+      className="fixed bottom-5 right-5 z-[60] rounded-full shadow-glow hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary/50"
     >
       <div className="relative">
         <JastAvatar size={56} className="ring-2 ring-primary/40" />

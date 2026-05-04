@@ -99,7 +99,7 @@ export function JastDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(o) => !o && closeChat()}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col !z-[70]">
         <SheetHeader className="px-5 py-4 border-b">
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
