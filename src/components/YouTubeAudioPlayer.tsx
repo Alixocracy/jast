@@ -58,6 +58,20 @@ const LOCAL_AUDIO_TRACKS: SavedTrack[] = [
     isPlaylist: false,
     isLocal: true,
   },
+  {
+    id: "local-glass-river",
+    url: "/audio/glass-river.mp3",
+    title: "Glass River (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
+  {
+    id: "local-glass-river-2",
+    url: "/audio/glass-river-2.mp3",
+    title: "Glass River II (Local)",
+    isPlaylist: false,
+    isLocal: true,
+  },
 ];
 
 // Default lofi tracks to seed the playlist
